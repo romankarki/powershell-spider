@@ -25,7 +25,22 @@
 
 .terminal-pane.active {
   border-color: var(--border-active);
-  box-shadow: 0 0 8px var(--green-glow), inset 0 0 8px rgba(0, 255, 65, 0.05);
+  box-shadow:
+    0 0 8px var(--green-glow),
+    inset 0 0 8px rgba(0, 255, 65, 0.05);
+}
+
+/* Active pane top border glow line */
+.terminal-pane.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--green), transparent);
+  z-index: 5;
+  animation: pulse-glow 2s ease-in-out infinite;
 }
 
 .terminal-pane .terminal-header {
@@ -41,13 +56,19 @@
   user-select: none;
 }
 
+.terminal-pane.active .terminal-header {
+  background: linear-gradient(90deg, rgba(0, 255, 65, 0.05), var(--bg-secondary));
+}
+
 .terminal-pane .terminal-header .terminal-label {
   color: var(--green-dim);
   cursor: pointer;
+  letter-spacing: 0.5px;
 }
 
 .terminal-pane .terminal-header .terminal-label:hover {
   color: var(--green);
+  text-shadow: 0 0 6px var(--green-glow);
 }
 
 .terminal-pane .terminal-body {
@@ -56,4 +77,10 @@
   left: 0;
   right: 0;
   bottom: 0;
+}
+
+/* Divider glow on hover */
+.divider:hover {
+  background: var(--green-dim) !important;
+  box-shadow: 0 0 6px var(--green-glow);
 }

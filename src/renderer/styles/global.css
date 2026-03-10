@@ -18,6 +18,7 @@
   --cyan-glow: rgba(0, 229, 255, 0.3);
   --red: #ff0040;
   --yellow: #ffea00;
+  --magenta: #ff00ff;
   --text-primary: #e0e0e0;
   --text-secondary: #888888;
   --border: #2a2a2a;
@@ -77,4 +78,47 @@ html, body, #root {
   );
   pointer-events: none;
   z-index: 9999;
+}
+
+/* Pulsing glow keyframe for active elements */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.8; }
+  94% { opacity: 1; }
+  96% { opacity: 0.9; }
+  97% { opacity: 1; }
+}
+
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slide-in-down {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Subtle vignette on the whole app */
+#root::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.4) 100%);
+  pointer-events: none;
+  z-index: 9998;
 }

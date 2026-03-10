@@ -4,6 +4,7 @@ import { useTerminalStore } from '../state/terminal-store';
 interface Command {
   label: string;
   shortcut?: string;
+  category: string;
   action: () => void;
 }
 
@@ -21,15 +22,16 @@ export const CommandPalette: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const commands: Command[] = [
-    { label: 'Split Horizontal', shortcut: 'Ctrl+Shift+H', action: () => splitTerminal('horizontal') },
-    { label: 'Split Vertical', shortcut: 'Ctrl+Shift+V', action: () => splitTerminal('vertical') },
-    { label: 'Close Pane', shortcut: 'Ctrl+Shift+W', action: () => closeTerminal(getActiveTerminalId()) },
-    { label: 'New Workspace', shortcut: 'Ctrl+Shift+T', action: () => addWorkspace() },
-    { label: 'Toggle Agent Panel', shortcut: 'Ctrl+Shift+A', action: () => toggleAgentPanel() },
+    { label: 'Split Horizontal', shortcut: 'Ctrl+Shift+H', category: 'PANE', action: () => splitTerminal('horizontal') },
+    { label: 'Split Vertical', shortcut: 'Ctrl+Shift+V', category: 'PANE', action: () => splitTerminal('vertical') },
+    { label: 'Close Pane', shortcut: 'Ctrl+Shift+W', category: 'PANE', action: () => closeTerminal(getActiveTerminalId()) },
+    { label: 'New Workspace', shortcut: 'Ctrl+Shift+T', category: 'WORKSPACE', action: () => addWorkspace() },
+    { label: 'Toggle Agent Panel', shortcut: 'Ctrl+Shift+A', category: 'AGENT', action: () => toggleAgentPanel() },
   ];
 
   const filtered = commands.filter((c) =>
-    c.label.toLowerCase().includes(query.toLowerCase())
+    c.label.toLowerCase().includes(query.toLowerCase()) ||
+    c.category.toLowerCase().includes(query.toLowerCase())
   );
 
   useEffect(() => {
@@ -76,41 +78,58 @@ export const CommandPalette: React.FC = () => {
         zIndex: 1000,
         display: 'flex',
         justifyContent: 'center',
-        paddingTop: '80px',
+        paddingTop: '70px',
+        background: 'rgba(0, 0, 0, 0.5)',
+        backdropFilter: 'blur(2px)',
       }}
       onClick={() => setOpen(false)}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: '450px',
+          width: '480px',
           background: 'var(--bg-secondary)',
           border: '1px solid var(--green-dim)',
           borderRadius: '6px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 16px var(--green-glow)',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.6), 0 0 20px var(--green-glow), 0 0 60px rgba(0, 255, 65, 0.08)',
           overflow: 'hidden',
-          maxHeight: '300px',
+          maxHeight: '340px',
+          animation: 'slide-in-down 0.15s ease-out',
         }}
       >
-        <input
-          ref={inputRef}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="> type a command..."
-          style={{
-            width: '100%',
-            padding: '10px 14px',
-            background: 'var(--bg-primary)',
-            border: 'none',
-            borderBottom: '1px solid var(--border)',
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          background: 'var(--bg-primary)',
+          borderBottom: '1px solid var(--border)',
+        }}>
+          <span style={{
             color: 'var(--green)',
-            fontFamily: 'var(--font-mono)',
+            padding: '10px 0 10px 14px',
             fontSize: '13px',
-            outline: 'none',
-          }}
-        />
-        <div style={{ maxHeight: '230px', overflow: 'auto' }}>
+            fontWeight: 700,
+          }}>
+            {'>'}
+          </span>
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="type a command..."
+            style={{
+              flex: 1,
+              padding: '10px 14px 10px 6px',
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--green)',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '13px',
+              outline: 'none',
+            }}
+          />
+        </div>
+        <div style={{ maxHeight: '270px', overflow: 'auto' }}>
           {filtered.map((cmd, i) => (
             <div
               key={cmd.label}
@@ -121,19 +140,52 @@ export const CommandPalette: React.FC = () => {
                 alignItems: 'center',
                 padding: '8px 14px',
                 cursor: 'pointer',
-                background: i === selectedIndex ? 'var(--bg-tertiary)' : 'transparent',
+                background: i === selectedIndex
+                  ? 'linear-gradient(90deg, rgba(0, 255, 65, 0.1), transparent)'
+                  : 'transparent',
                 color: i === selectedIndex ? 'var(--green)' : 'var(--text-primary)',
                 fontSize: '12px',
+                borderLeft: i === selectedIndex ? '2px solid var(--green)' : '2px solid transparent',
+                transition: 'all 0.1s ease',
               }}
             >
-              <span>{cmd.label}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{
+                  fontSize: '9px',
+                  color: 'var(--cyan-dim)',
+                  background: 'rgba(0, 229, 255, 0.1)',
+                  padding: '1px 5px',
+                  borderRadius: '2px',
+                  letterSpacing: '0.5px',
+                }}>
+                  {cmd.category}
+                </span>
+                <span>{cmd.label}</span>
+              </div>
               {cmd.shortcut && (
-                <span style={{ color: 'var(--text-secondary)', fontSize: '10px' }}>
+                <span style={{
+                  color: 'var(--text-secondary)',
+                  fontSize: '10px',
+                  background: 'var(--bg-tertiary)',
+                  padding: '2px 6px',
+                  borderRadius: '3px',
+                  border: '1px solid var(--border)',
+                }}>
                   {cmd.shortcut}
                 </span>
               )}
             </div>
           ))}
+          {filtered.length === 0 && (
+            <div style={{
+              padding: '16px 14px',
+              textAlign: 'center',
+              color: 'var(--text-secondary)',
+              fontSize: '12px',
+            }}>
+              No commands found
+            </div>
+          )}
         </div>
       </div>
     </div>

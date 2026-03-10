@@ -13,7 +13,7 @@ const ptys = new Map<string, IPty>();
 
 export function createPty(id: string, onData: (data: string) => void, onExit: () => void): void {
   const shell = 'powershell.exe';
-  const ptyProcess = getPty().spawn(shell, [], {
+  const ptyProcess = getPty()!.spawn(shell, [], {
     name: 'xterm-256color',
     cols: 80,
     rows: 24,

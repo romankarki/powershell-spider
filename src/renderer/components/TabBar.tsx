@@ -26,10 +26,10 @@ export const TabBar: React.FC = () => {
       style={{
         display: 'flex',
         alignItems: 'center',
-        height: '28px',
+        height: '30px',
         background: 'var(--bg-primary)',
         borderBottom: '1px solid var(--border)',
-        padding: '0 4px',
+        padding: '0 6px',
         gap: '2px',
         overflow: 'hidden',
       }}
@@ -46,19 +46,42 @@ export const TabBar: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            padding: '0 10px',
-            height: '24px',
-            background: i === activeIndex ? 'var(--bg-tertiary)' : 'transparent',
+            padding: '0 12px',
+            height: '26px',
+            background: i === activeIndex
+              ? 'linear-gradient(180deg, var(--bg-tertiary), var(--bg-secondary))'
+              : 'transparent',
             border: `1px solid ${i === activeIndex ? 'var(--border)' : 'transparent'}`,
-            borderBottom: i === activeIndex ? '1px solid var(--bg-tertiary)' : '1px solid var(--border)',
+            borderBottom: i === activeIndex ? '1px solid var(--bg-secondary)' : '1px solid var(--border)',
             borderRadius: '4px 4px 0 0',
             color: i === activeIndex ? 'var(--green)' : 'var(--text-secondary)',
             cursor: 'pointer',
             fontSize: '11px',
             userSelect: 'none',
             whiteSpace: 'nowrap',
+            letterSpacing: '0.5px',
+            transition: 'all 0.15s ease',
+            position: 'relative',
           }}
         >
+          {i === activeIndex && (
+            <span style={{
+              position: 'absolute',
+              top: '-1px',
+              left: '20%',
+              right: '20%',
+              height: '1px',
+              background: 'var(--green)',
+              boxShadow: '0 0 4px var(--green-glow)',
+            }} />
+          )}
+          <span style={{
+            fontSize: '8px',
+            color: i === activeIndex ? 'var(--green-dim)' : 'var(--text-secondary)',
+            opacity: 0.6,
+          }}>
+            {i + 1}
+          </span>
           {editIndex === i ? (
             <input
               autoFocus
@@ -92,9 +115,19 @@ export const TabBar: React.FC = () => {
                 color: 'var(--text-secondary)',
                 cursor: 'pointer',
                 fontSize: '10px',
+                opacity: 0.5,
+                transition: 'opacity 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '1';
+                e.currentTarget.style.color = 'var(--red)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '0.5';
+                e.currentTarget.style.color = 'var(--text-secondary)';
               }}
             >
-              ✕
+              \u2715
             </span>
           )}
         </div>
@@ -106,12 +139,21 @@ export const TabBar: React.FC = () => {
           border: '1px solid var(--border)',
           color: 'var(--text-secondary)',
           cursor: 'pointer',
-          padding: '0 8px',
+          padding: '0 10px',
           height: '22px',
           fontSize: '14px',
           fontFamily: 'var(--font-mono)',
           borderRadius: '3px',
           marginLeft: '4px',
+          transition: 'all 0.15s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = 'var(--green-dim)';
+          e.currentTarget.style.color = 'var(--green)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = 'var(--border)';
+          e.currentTarget.style.color = 'var(--text-secondary)';
         }}
       >
         +
@@ -120,19 +162,25 @@ export const TabBar: React.FC = () => {
       <button
         onClick={toggleAgentPanel}
         style={{
-          background: agentPanelOpen ? 'var(--bg-tertiary)' : 'transparent',
+          background: agentPanelOpen
+            ? 'linear-gradient(90deg, rgba(0, 229, 255, 0.15), rgba(0, 229, 255, 0.05))'
+            : 'transparent',
           border: `1px solid ${agentPanelOpen ? 'var(--cyan-dim)' : 'var(--border)'}`,
           color: agentPanelOpen ? 'var(--cyan)' : 'var(--text-secondary)',
           cursor: 'pointer',
-          padding: '0 10px',
+          padding: '0 12px',
           height: '22px',
-          fontSize: '11px',
+          fontSize: '10px',
           fontFamily: 'var(--font-mono)',
           borderRadius: '3px',
-          marginRight: '4px',
+          marginRight: '6px',
+          letterSpacing: '2px',
+          fontWeight: 700,
+          transition: 'all 0.15s ease',
+          boxShadow: agentPanelOpen ? '0 0 8px var(--cyan-glow)' : 'none',
         }}
       >
-        AGENT
+        {agentPanelOpen ? '\u25C0 AGENT' : 'AGENT \u25B6'}
       </button>
     </div>
   );
