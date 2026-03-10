@@ -1,17 +1,19 @@
 import { ipcMain, BrowserWindow } from 'electron';
-import { createPty, writePty, resizePty, killPty } from './pty-manager';
+import { createPty, writePty, resizePty, killPty, killAll } from './pty-manager';
 
 export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void {
-  ipcMain.handle('terminal:create', (_event, id: string) => {
+  function safeSend(channel: string, data?: string) {
     const win = getWindow();
+    if (win && !win.isDestroyed()) {
+      win.webContents.send(channel, data);
+    }
+  }
+
+  ipcMain.handle('terminal:create', (_event, id: string) => {
     createPty(
       id,
-      (data) => {
-        win?.webContents.send(`terminal:data:${id}`, data);
-      },
-      () => {
-        win?.webContents.send(`terminal:exit:${id}`);
-      }
+      (data) => safeSend(`terminal:data:${id}`, data),
+      () => safeSend(`terminal:exit:${id}`)
     );
   });
 
@@ -48,6 +50,7 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
   });
 
   ipcMain.handle('window:close', () => {
+    killAll();
     getWindow()?.close();
   });
 }

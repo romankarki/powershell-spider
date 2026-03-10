@@ -51,6 +51,12 @@ const createWindow = () => {
     );
   }
 
+  // Kill all PTY processes before the window object is destroyed
+  // to prevent "Object has been destroyed" errors from lingering data events
+  mainWindow.on('close', () => {
+    killAll();
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
