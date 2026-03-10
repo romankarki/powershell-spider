@@ -54,7 +54,7 @@ export const AgentPanel: React.FC = () => {
         flexDirection: 'column',
         userSelect: 'none',
         boxShadow: '-4px 0 20px rgba(0, 229, 255, 0.08)',
-        animation: 'slide-in-right 0.2s ease-out',
+        animation: 'slide-in-right 0.1s ease-out',
       }}
     >
       {/* Header */}

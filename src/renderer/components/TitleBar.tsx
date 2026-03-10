@@ -32,7 +32,6 @@ export const TitleBar: React.FC = () => {
           fontSize: '13px',
           letterSpacing: '2px',
           textShadow: '0 0 10px var(--green-glow), 0 0 20px rgba(0, 255, 65, 0.15)',
-          animation: 'flicker 8s infinite',
         }}>
           /\../\
         </span>

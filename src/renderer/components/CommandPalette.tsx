@@ -94,7 +94,7 @@ export const CommandPalette: React.FC = () => {
           boxShadow: '0 8px 40px rgba(0,0,0,0.6), 0 0 20px var(--green-glow), 0 0 60px rgba(0, 255, 65, 0.08)',
           overflow: 'hidden',
           maxHeight: '340px',
-          animation: 'slide-in-down 0.15s ease-out',
+          animation: 'slide-in-down 0.08s ease-out',
         }}
       >
         <div style={{

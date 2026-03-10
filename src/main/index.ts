@@ -14,12 +14,18 @@ const createWindow = () => {
     width: 1200,
     height: 800,
     frame: false,
+    show: false,
     backgroundColor: '#0a0a0a',
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       nodeIntegration: false,
       contextIsolation: true,
     },
+  });
+
+  // Show window as soon as content is ready — no white flash
+  mainWindow.once('ready-to-show', () => {
+    mainWindow?.show();
   });
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
