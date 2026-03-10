@@ -1,5 +1,5 @@
 import { ipcMain, BrowserWindow } from 'electron';
-import { createPty, writePty, resizePty, killPty, killAll } from './pty-manager';
+import { createPty, writePty, resizePty, killPty, killAll, getCwd } from './pty-manager';
 
 export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void {
   function safeSend(channel: string, data?: string) {
@@ -9,12 +9,17 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
     }
   }
 
-  ipcMain.handle('terminal:create', (_event, id: string) => {
+  ipcMain.handle('terminal:create', (_event, id: string, cwd?: string) => {
     createPty(
       id,
       (data) => safeSend(`terminal:data:${id}`, data),
-      () => safeSend(`terminal:exit:${id}`)
+      () => safeSend(`terminal:exit:${id}`),
+      cwd
     );
+  });
+
+  ipcMain.handle('terminal:get-cwd', (_event, id: string) => {
+    return getCwd(id);
   });
 
   ipcMain.handle('terminal:write', (_event, id: string, data: string) => {

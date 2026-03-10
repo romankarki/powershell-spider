@@ -2,11 +2,12 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('electronAPI', {
   // Terminal
-  createTerminal: (id: string) => ipcRenderer.invoke('terminal:create', id),
+  createTerminal: (id: string, cwd?: string) => ipcRenderer.invoke('terminal:create', id, cwd),
   writeTerminal: (id: string, data: string) => ipcRenderer.invoke('terminal:write', id, data),
   resizeTerminal: (id: string, cols: number, rows: number) => ipcRenderer.invoke('terminal:resize', id, cols, rows),
   killTerminal: (id: string) => ipcRenderer.invoke('terminal:kill', id),
   writeAll: (ids: string[], data: string) => ipcRenderer.invoke('terminal:write-all', ids, data),
+  getCwd: (id: string) => ipcRenderer.invoke('terminal:get-cwd', id),
   onTerminalData: (id: string, callback: (data: string) => void) => {
     const channel = `terminal:data:${id}`;
     const listener = (_event: Electron.IpcRendererEvent, data: string) => callback(data);

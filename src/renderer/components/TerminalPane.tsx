@@ -17,9 +17,10 @@ export const TerminalPane: React.FC<TerminalPaneProps> = ({ id }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
 
-  useTerminal(id, containerRef, isActive, () => setActive(id));
+  const termInfo = terminals.get(id);
+  useTerminal(id, containerRef, isActive, () => setActive(id), termInfo?.cwd);
 
-  const label = terminals.get(id)?.label || id.slice(0, 8);
+  const label = termInfo?.label || id.slice(0, 8);
 
   const handleDoubleClick = () => {
     setEditValue(label);

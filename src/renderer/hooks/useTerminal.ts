@@ -77,7 +77,8 @@ export function useTerminal(
   id: string,
   containerRef: React.RefObject<HTMLDivElement | null>,
   isActive: boolean,
-  onFocus: () => void
+  onFocus: () => void,
+  cwd?: string
 ) {
   const termRef = useRef<Terminal | null>(null);
   const fitRef = useRef<FitAddon | null>(null);
@@ -141,8 +142,8 @@ export function useTerminal(
         fitAddon.fit();
       });
 
-      // Create PTY in main process
-      window.electronAPI.createTerminal(id);
+      // Create PTY in main process (with optional cwd from split source)
+      window.electronAPI.createTerminal(id, cwd);
 
       // PTY -> xterm
       const removeDataListener = window.electronAPI.onTerminalData(id, (data) => {

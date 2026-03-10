@@ -23,7 +23,7 @@ interface TerminalStore {
 
   // Terminal actions
   setActiveTerminal: (id: string) => void;
-  splitTerminal: (direction: SplitDirection) => void;
+  splitTerminal: (direction: SplitDirection) => Promise<void>;
   closeTerminal: (id: string) => void;
   renameTerminal: (id: string, label: string) => void;
   updateTree: (tree: TreeNode) => void;
@@ -106,20 +106,29 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
       return { workspaces };
     }),
 
-    splitTerminal: (direction) => set((state) => {
-      const ws = state.workspaces[state.activeWorkspaceIndex];
-      const newId = uuid();
-      const newTree = splitNode(ws.tree, ws.activeTerminalId, newId, direction);
-      const terminals = new Map(state.terminals);
-      terminals.set(newId, { id: newId, label: `PS ${terminals.size + 1}` });
-      const workspaces = [...state.workspaces];
-      workspaces[state.activeWorkspaceIndex] = {
-        ...ws,
-        tree: newTree,
-        activeTerminalId: newId,
-      };
-      return { workspaces, terminals };
-    }),
+    splitTerminal: async (direction) => {
+      // Fetch cwd from the active terminal's PTY before splitting
+      const activeId = get().getActiveTerminalId();
+      let cwd: string | undefined;
+      try {
+        cwd = await window.electronAPI.getCwd(activeId);
+      } catch { /* use default */ }
+
+      set((state) => {
+        const ws = state.workspaces[state.activeWorkspaceIndex];
+        const newId = uuid();
+        const newTree = splitNode(ws.tree, ws.activeTerminalId, newId, direction);
+        const terminals = new Map(state.terminals);
+        terminals.set(newId, { id: newId, label: `PS ${terminals.size + 1}`, cwd });
+        const workspaces = [...state.workspaces];
+        workspaces[state.activeWorkspaceIndex] = {
+          ...ws,
+          tree: newTree,
+          activeTerminalId: newId,
+        };
+        return { workspaces, terminals };
+      });
+    },
 
     closeTerminal: (id) => set((state) => {
       const ws = state.workspaces[state.activeWorkspaceIndex];

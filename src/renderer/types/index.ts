@@ -18,6 +18,7 @@ export type TreeNode = TerminalLeaf | SplitNode;
 export interface TerminalInfo {
   id: string;
   label: string;
+  cwd?: string; // starting directory for this terminal
 }
 
 export interface Workspace {
