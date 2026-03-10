@@ -1,0 +1,59 @@
+/* xterm.js theme overrides */
+.xterm {
+  padding: 4px;
+  height: 100%;
+}
+
+.xterm-viewport {
+  background-color: var(--bg-primary) !important;
+}
+
+.xterm-screen {
+  height: 100% !important;
+}
+
+/* Terminal pane */
+.terminal-pane {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.terminal-pane.active {
+  border-color: var(--border-active);
+  box-shadow: 0 0 8px var(--green-glow), inset 0 0 8px rgba(0, 255, 65, 0.05);
+}
+
+.terminal-pane .terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 24px;
+  padding: 0 8px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.terminal-pane .terminal-header .terminal-label {
+  color: var(--green-dim);
+  cursor: pointer;
+}
+
+.terminal-pane .terminal-header .terminal-label:hover {
+  color: var(--green);
+}
+
+.terminal-pane .terminal-body {
+  position: absolute;
+  top: 24px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
