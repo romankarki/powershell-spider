@@ -2,7 +2,7 @@
   "name": "powershell-spider",
   "version": "1.0.0",
   "description": "A tmux-like multi-terminal manager for Windows PowerShell",
-  "main": ".vite/build/main.js",
+  "main": ".vite/build/index.js",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
@@ -22,7 +22,6 @@
     "@electron-forge/plugin-vite": "^7.11.1",
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/xterm": "^6.0.0",
-    "electron": "^40.8.0",
     "node-pty": "^1.1.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -30,11 +29,13 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.0.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/uuid": "^10.0.0",
-    "@vitejs/plugin-react": "^5.1.4",
+    "@vitejs/plugin-react": "^4.7.0",
+    "electron": "^40.8.0",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1"
+    "vite": "^6.4.1"
   }
 }

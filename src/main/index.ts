@@ -3,12 +3,11 @@ import path from 'path';
 import { registerIpcHandlers } from './ipc-handlers';
 import { killAll } from './pty-manager';
 
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require('electron-squirrel-startup')) {
-  app.quit();
-}
-
 let mainWindow: BrowserWindow | null = null;
+
+// Declare forge vite globals
+declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
+declare const MAIN_WINDOW_VITE_NAME: string;
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -23,7 +22,6 @@ const createWindow = () => {
     },
   });
 
-  // Vite dev server URL is injected by electron-forge
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
@@ -36,10 +34,6 @@ const createWindow = () => {
     mainWindow = null;
   });
 };
-
-// Declare forge vite globals
-declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
-declare const MAIN_WINDOW_VITE_NAME: string;
 
 registerIpcHandlers(() => mainWindow);
 
