@@ -6,6 +6,7 @@ import { StatusBar } from './components/StatusBar';
 import { CommandPalette } from './components/CommandPalette';
 import { AgentPanel } from './components/AgentPanel';
 import { useTerminalStore } from './state/terminal-store';
+import { findTerminalInDirection, NavDirection } from './state/split-tree';
 
 const App: React.FC = () => {
   const workspace = useTerminalStore((s) => s.getActiveWorkspace());
@@ -16,9 +17,28 @@ const App: React.FC = () => {
   const addWorkspace = useTerminalStore((s) => s.addWorkspace);
   const toggleAgentPanel = useTerminalStore((s) => s.toggleAgentPanel);
   const toggleCommandPalette = useTerminalStore((s) => s.toggleCommandPalette);
+  const setActiveTerminal = useTerminalStore((s) => s.setActiveTerminal);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Alt+Ctrl+Arrow: spatial pane navigation
+      if (e.altKey && e.ctrlKey && !e.shiftKey) {
+        const dirMap: Record<string, NavDirection> = {
+          ArrowLeft: 'left',
+          ArrowRight: 'right',
+          ArrowUp: 'up',
+          ArrowDown: 'down',
+        };
+        const navDir = dirMap[e.key];
+        if (navDir) {
+          e.preventDefault();
+          const ws = useTerminalStore.getState().getActiveWorkspace();
+          const target = findTerminalInDirection(ws.tree, ws.activeTerminalId, navDir);
+          if (target) setActiveTerminal(target);
+          return;
+        }
+      }
+
       if (e.ctrlKey && e.shiftKey) {
         switch (e.key.toUpperCase()) {
           case 'H':
@@ -51,7 +71,7 @@ const App: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [splitTerminal, closeTerminal, getActiveTerminalId, addWorkspace, toggleAgentPanel, toggleCommandPalette]);
+  }, [splitTerminal, closeTerminal, getActiveTerminalId, addWorkspace, toggleAgentPanel, toggleCommandPalette, setActiveTerminal]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>

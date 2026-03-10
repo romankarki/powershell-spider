@@ -66,6 +66,7 @@ export const StatusBar: React.FC = () => {
         </span>
         <span><span style={{ color: 'var(--green-dim)' }}>^+&#8679;</span> W close</span>
         <span><span style={{ color: 'var(--cyan-dim)' }}>^+&#8679;</span> P cmd</span>
+        <span><span style={{ color: 'var(--green-dim)' }}>^+Alt+&#8592;&#8594;&#8593;&#8595;</span> nav</span>
       </div>
     </div>
   );
