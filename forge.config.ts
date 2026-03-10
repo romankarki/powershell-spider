@@ -4,11 +4,19 @@ import { VitePlugin } from '@electron-forge/plugin-vite';
 
 const config: ForgeConfig = {
   packagerConfig: {
+    name: 'PowerShell Spider',
+    executableName: 'powershell-spider',
+    icon: './assets/icon',
     asar: {
       unpack: '**/*.node',
     },
   },
-  makers: [new MakerSquirrel({})],
+  makers: [
+    new MakerSquirrel({
+      name: 'powershell-spider',
+      setupIcon: './assets/icon.ico',
+    }),
+  ],
   plugins: [
     new VitePlugin({
       build: [

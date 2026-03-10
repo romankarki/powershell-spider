@@ -13,7 +13,7 @@
     "url": "git+https://github.com/romankarki/powershell-spider.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "romankarki",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
