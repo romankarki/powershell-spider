@@ -7,7 +7,7 @@ async function startDev() {
   // 1. Start Vite dev server for renderer
   const viteServer = await createServer({
     configFile: path.join(__dirname, 'vite.renderer.config.ts'),
-    root: path.join(__dirname, 'src/renderer'),
+    root: __dirname,
   });
   await viteServer.listen(5173);
   const url = `http://localhost:${viteServer.config.server.port || 5173}`;
