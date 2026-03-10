@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { v4 as uuid } from 'uuid';
 import { Workspace, TreeNode, SplitDirection, TerminalInfo } from '../types';
 import { createLeaf, splitNode, removeNode, findAllTerminalIds, findNextTerminalId } from './split-tree';
+import { destroyTerminal } from '../hooks/useTerminal';
 
 interface TerminalStore {
   workspaces: Workspace[];
@@ -80,7 +81,11 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
       const ws = state.workspaces[index];
       const termIds = findAllTerminalIds(ws.tree);
       const terminals = new Map(state.terminals);
-      termIds.forEach((id) => terminals.delete(id));
+      // Destroy all terminals in the removed workspace
+      termIds.forEach((id) => {
+        destroyTerminal(id);
+        terminals.delete(id);
+      });
       const workspaces = state.workspaces.filter((_, i) => i !== index);
       const activeWorkspaceIndex = Math.min(state.activeWorkspaceIndex, workspaces.length - 1);
       return { workspaces, activeWorkspaceIndex, terminals };
@@ -120,6 +125,9 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
       const ws = state.workspaces[state.activeWorkspaceIndex];
       const result = removeNode(ws.tree, id);
       if (!result) return state; // Don't close the last terminal
+
+      // Destroy the PTY and xterm instance
+      destroyTerminal(id);
 
       const terminals = new Map(state.terminals);
       terminals.delete(id);
