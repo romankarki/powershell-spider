@@ -3,6 +3,21 @@ import path from 'path';
 import { registerIpcHandlers } from './ipc-handlers';
 import { killAll } from './pty-manager';
 
+// Handle Squirrel.Windows install/update/uninstall events.
+// The app is launched by Squirrel during these phases — quit immediately
+// so the installer can finish cleanly without the app interfering.
+if (process.platform === 'win32') {
+  const cmd = process.argv[1];
+  if (
+    cmd === '--squirrel-install' ||
+    cmd === '--squirrel-updated' ||
+    cmd === '--squirrel-uninstall' ||
+    cmd === '--squirrel-obsolete'
+  ) {
+    app.quit();
+  }
+}
+
 let mainWindow: BrowserWindow | null = null;
 
 // Declare forge vite globals
