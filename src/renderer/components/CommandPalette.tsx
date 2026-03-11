@@ -16,6 +16,7 @@ export const CommandPalette: React.FC = () => {
   const toggleAgentPanel = useTerminalStore((s) => s.toggleAgentPanel);
   const closeTerminal = useTerminalStore((s) => s.closeTerminal);
   const getActiveTerminalId = useTerminalStore((s) => s.getActiveTerminalId);
+  const toggleSearch = useTerminalStore((s) => s.toggleSearch);
 
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -27,6 +28,7 @@ export const CommandPalette: React.FC = () => {
     { label: 'Close Pane', shortcut: 'Ctrl+Shift+W', category: 'PANE', action: () => closeTerminal(getActiveTerminalId()) },
     { label: 'New Workspace', shortcut: 'Ctrl+Shift+T', category: 'WORKSPACE', action: () => addWorkspace() },
     { label: 'Toggle Agent Panel', shortcut: 'Ctrl+Shift+A', category: 'AGENT', action: () => toggleAgentPanel() },
+    { label: 'Search Terminal', shortcut: 'Ctrl+Shift+F', category: 'PANE', action: () => toggleSearch() },
   ];
 
   const filtered = commands.filter((c) =>

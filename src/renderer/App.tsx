@@ -17,6 +17,7 @@ const App: React.FC = () => {
   const addWorkspace = useTerminalStore((s) => s.addWorkspace);
   const toggleAgentPanel = useTerminalStore((s) => s.toggleAgentPanel);
   const toggleCommandPalette = useTerminalStore((s) => s.toggleCommandPalette);
+  const toggleSearch = useTerminalStore((s) => s.toggleSearch);
   const setActiveTerminal = useTerminalStore((s) => s.setActiveTerminal);
 
   useEffect(() => {
@@ -65,13 +66,17 @@ const App: React.FC = () => {
             e.preventDefault();
             toggleCommandPalette();
             break;
+          case 'F':
+            e.preventDefault();
+            toggleSearch();
+            break;
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [splitTerminal, closeTerminal, getActiveTerminalId, addWorkspace, toggleAgentPanel, toggleCommandPalette, setActiveTerminal]);
+  }, [splitTerminal, closeTerminal, getActiveTerminalId, addWorkspace, toggleAgentPanel, toggleCommandPalette, toggleSearch, setActiveTerminal]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>

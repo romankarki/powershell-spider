@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useTerminal } from '../hooks/useTerminal';
 import { useTerminalStore } from '../state/terminal-store';
+import { SearchBar } from './SearchBar';
 
 interface TerminalPaneProps {
   id: string;
@@ -16,6 +17,10 @@ export const TerminalPane: React.FC<TerminalPaneProps> = ({ id }) => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
+
+  const searchOpenTerminalId = useTerminalStore((s) => s.searchOpenTerminalId);
+  const closeSearch = useTerminalStore((s) => s.closeSearch);
+  const showSearch = searchOpenTerminalId === id;
 
   const termInfo = terminals.get(id);
   useTerminal(id, containerRef, isActive, () => setActive(id), termInfo?.cwd);
@@ -38,7 +43,9 @@ export const TerminalPane: React.FC<TerminalPaneProps> = ({ id }) => {
     <div
       className={`terminal-pane ${isActive ? 'active' : ''}`}
       onClick={() => setActive(id)}
+      style={{ position: 'relative' }}
     >
+      {showSearch && <SearchBar terminalId={id} onClose={closeSearch} />}
       <div className="terminal-header">
         {isEditing ? (
           <input

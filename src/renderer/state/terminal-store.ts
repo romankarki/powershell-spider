@@ -10,6 +10,7 @@ interface TerminalStore {
   terminals: Map<string, TerminalInfo>;
   agentPanelOpen: boolean;
   commandPaletteOpen: boolean;
+  searchOpenTerminalId: string | null;
 
   // Getters
   getActiveWorkspace: () => Workspace;
@@ -32,6 +33,8 @@ interface TerminalStore {
   toggleAgentPanel: () => void;
   toggleCommandPalette: () => void;
   setCommandPaletteOpen: (open: boolean) => void;
+  toggleSearch: () => void;
+  closeSearch: () => void;
 }
 
 function createWorkspace(name: string): Workspace {
@@ -54,6 +57,7 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
     terminals: new Map([[initialTermId, { id: initialTermId, label: 'PS 1' }]]),
     agentPanelOpen: false,
     commandPaletteOpen: false,
+    searchOpenTerminalId: null,
 
     getActiveWorkspace: () => {
       const state = get();
@@ -173,5 +177,12 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
     toggleAgentPanel: () => set((state) => ({ agentPanelOpen: !state.agentPanelOpen })),
     toggleCommandPalette: () => set((state) => ({ commandPaletteOpen: !state.commandPaletteOpen })),
     setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
+    toggleSearch: () => set((state) => {
+      const activeId = state.getActiveWorkspace().activeTerminalId;
+      return {
+        searchOpenTerminalId: state.searchOpenTerminalId === activeId ? null : activeId,
+      };
+    }),
+    closeSearch: () => set({ searchOpenTerminalId: null }),
   };
 });

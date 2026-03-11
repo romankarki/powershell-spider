@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
+import { SearchAddon, ISearchOptions } from '@xterm/addon-search';
 import '@xterm/xterm/css/xterm.css';
 
 declare global {
@@ -51,6 +52,7 @@ const XTERM_THEME = {
 interface TerminalEntry {
   terminal: Terminal;
   fitAddon: FitAddon;
+  searchAddon: SearchAddon;
   wrapper: HTMLDivElement;        // persistent DOM container that xterm renders into
   removeDataListener: () => void;
   onDataDispose: { dispose: () => void };
@@ -132,7 +134,9 @@ export function useTerminal(
       });
 
       const fitAddon = new FitAddon();
+      const searchAddon = new SearchAddon();
       term.loadAddon(fitAddon);
+      term.loadAddon(searchAddon);
       term.open(wrapper);
 
       termRef.current = term;
@@ -170,7 +174,7 @@ export function useTerminal(
       resizeObserver.observe(container);
 
       // Store in registry
-      entry = { terminal: term, fitAddon, wrapper, removeDataListener, onDataDispose, resizeObserver };
+      entry = { terminal: term, fitAddon, searchAddon, wrapper, removeDataListener, onDataDispose, resizeObserver };
       registry.set(id, entry);
     }
 
@@ -196,4 +200,66 @@ export function useTerminal(
   }, [isActive]);
 
   return { termRef, fitRef };
+}
+
+// --- Search API ---
+// Exposes search operations for a terminal by ID, used by the SearchBar component.
+
+const SEARCH_DECORATIONS = {
+  matchBackground: '#ffea0033',
+  matchBorder: '#ffea0066',
+  matchOverviewRuler: '#ffea00',
+  activeMatchBackground: '#00ff4155',
+  activeMatchBorder: '#00ff41',
+  activeMatchColorOverviewRuler: '#00ff41',
+};
+
+export interface SearchResult {
+  resultIndex: number;
+  resultCount: number;
+}
+
+// Per-terminal search result tracking, updated by onDidChangeResults listeners
+const searchResults = new Map<string, SearchResult>();
+
+/** Subscribe to search result changes for a terminal. Returns unsubscribe function. */
+export function onSearchResults(id: string, cb: (result: SearchResult) => void): () => void {
+  const entry = registry.get(id);
+  if (!entry) return () => {};
+  const dispose = entry.searchAddon.onDidChangeResults((e) => {
+    const result: SearchResult = { resultIndex: e.resultIndex, resultCount: e.resultCount };
+    searchResults.set(id, result);
+    cb(result);
+  });
+  return () => dispose.dispose();
+}
+
+function buildSearchOpts(options: { regex?: boolean; caseSensitive?: boolean; wholeWord?: boolean }): ISearchOptions {
+  return {
+    regex: options.regex ?? false,
+    caseSensitive: options.caseSensitive ?? false,
+    wholeWord: options.wholeWord ?? false,
+    decorations: SEARCH_DECORATIONS,
+    incremental: false,
+  };
+}
+
+export function searchNext(id: string, query: string, options: { regex?: boolean; caseSensitive?: boolean; wholeWord?: boolean } = {}): boolean {
+  const entry = registry.get(id);
+  if (!entry || !query) return false;
+  return entry.searchAddon.findNext(query, buildSearchOpts(options));
+}
+
+export function searchPrevious(id: string, query: string, options: { regex?: boolean; caseSensitive?: boolean; wholeWord?: boolean } = {}): boolean {
+  const entry = registry.get(id);
+  if (!entry || !query) return false;
+  return entry.searchAddon.findPrevious(query, buildSearchOpts(options));
+}
+
+export function clearSearch(id: string): void {
+  const entry = registry.get(id);
+  if (entry) {
+    entry.searchAddon.clearDecorations();
+    searchResults.delete(id);
+  }
 }
