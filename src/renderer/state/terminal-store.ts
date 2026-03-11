@@ -11,6 +11,8 @@ interface TerminalStore {
   agentPanelOpen: boolean;
   commandPaletteOpen: boolean;
   searchOpenTerminalId: string | null;
+  quickTerminalOpen: boolean;
+  quickTerminalId: string | null;
 
   // Getters
   getActiveWorkspace: () => Workspace;
@@ -35,6 +37,7 @@ interface TerminalStore {
   setCommandPaletteOpen: (open: boolean) => void;
   toggleSearch: () => void;
   closeSearch: () => void;
+  toggleQuickTerminal: () => void;
 }
 
 function createWorkspace(name: string): Workspace {
@@ -58,6 +61,8 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
     agentPanelOpen: false,
     commandPaletteOpen: false,
     searchOpenTerminalId: null,
+    quickTerminalOpen: false,
+    quickTerminalId: null,
 
     getActiveWorkspace: () => {
       const state = get();
@@ -184,5 +189,19 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
       };
     }),
     closeSearch: () => set({ searchOpenTerminalId: null }),
+    toggleQuickTerminal: () => set((state) => {
+      if (state.quickTerminalOpen) {
+        return { quickTerminalOpen: false };
+      }
+      // Create a quick terminal ID if we don't have one yet
+      let qId = state.quickTerminalId;
+      const terminals = new Map(state.terminals);
+      if (!qId || !terminals.has(qId)) {
+        qId = uuid();
+        terminals.set(qId, { id: qId, label: 'QUICK' });
+        return { quickTerminalOpen: true, quickTerminalId: qId, terminals };
+      }
+      return { quickTerminalOpen: true };
+    }),
   };
 });

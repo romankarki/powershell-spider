@@ -5,6 +5,7 @@ import { SplitContainer } from './components/SplitContainer';
 import { StatusBar } from './components/StatusBar';
 import { CommandPalette } from './components/CommandPalette';
 import { AgentPanel } from './components/AgentPanel';
+import { QuickTerminal } from './components/QuickTerminal';
 import { useTerminalStore } from './state/terminal-store';
 import { findTerminalInDirection, NavDirection } from './state/split-tree';
 
@@ -18,6 +19,7 @@ const App: React.FC = () => {
   const toggleAgentPanel = useTerminalStore((s) => s.toggleAgentPanel);
   const toggleCommandPalette = useTerminalStore((s) => s.toggleCommandPalette);
   const toggleSearch = useTerminalStore((s) => s.toggleSearch);
+  const toggleQuickTerminal = useTerminalStore((s) => s.toggleQuickTerminal);
   const setActiveTerminal = useTerminalStore((s) => s.setActiveTerminal);
 
   useEffect(() => {
@@ -38,6 +40,13 @@ const App: React.FC = () => {
           if (target) setActiveTerminal(target);
           return;
         }
+      }
+
+      // Ctrl+`: toggle quick terminal
+      if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key === '`') {
+        e.preventDefault();
+        toggleQuickTerminal();
+        return;
       }
 
       if (e.ctrlKey && e.shiftKey) {
@@ -76,7 +85,7 @@ const App: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [splitTerminal, closeTerminal, getActiveTerminalId, addWorkspace, toggleAgentPanel, toggleCommandPalette, toggleSearch, setActiveTerminal]);
+  }, [splitTerminal, closeTerminal, getActiveTerminalId, addWorkspace, toggleAgentPanel, toggleCommandPalette, toggleSearch, toggleQuickTerminal, setActiveTerminal]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
@@ -90,6 +99,7 @@ const App: React.FC = () => {
       </div>
       <StatusBar />
       <CommandPalette />
+      <QuickTerminal />
     </div>
   );
 };
