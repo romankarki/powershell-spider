@@ -59,8 +59,8 @@ npm run package
 
 | Shortcut | Action |
 |---|---|
-| Ctrl+Shift+H | Split horizontal |
-| Ctrl+Shift+V | Split vertical |
+| Ctrl+←/→ | Split horizontal |
+| Ctrl+↑/↓ | Split vertical |
 | Ctrl+Shift+W | Close pane |
 | Ctrl+Shift+T | New workspace |
 | Ctrl+Shift+A | Toggle agent panel |

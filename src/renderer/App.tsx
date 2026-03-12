@@ -24,6 +24,20 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+Arrow: split panes (Left/Right = horizontal, Up/Down = vertical)
+      if (e.ctrlKey && !e.shiftKey && !e.altKey) {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          e.preventDefault();
+          splitTerminal('horizontal');
+          return;
+        }
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          splitTerminal('vertical');
+          return;
+        }
+      }
+
       // Alt+Ctrl+Arrow: spatial pane navigation
       if (e.altKey && e.ctrlKey && !e.shiftKey) {
         const dirMap: Record<string, NavDirection> = {
@@ -51,14 +65,6 @@ const App: React.FC = () => {
 
       if (e.ctrlKey && e.shiftKey) {
         switch (e.key.toUpperCase()) {
-          case 'H':
-            e.preventDefault();
-            splitTerminal('horizontal');
-            break;
-          case 'V':
-            e.preventDefault();
-            splitTerminal('vertical');
-            break;
           case 'W':
             e.preventDefault();
             closeTerminal(getActiveTerminalId());
