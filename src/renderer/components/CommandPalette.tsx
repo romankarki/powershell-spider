@@ -24,8 +24,8 @@ export const CommandPalette: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const commands: Command[] = [
-    { label: 'Split Horizontal', shortcut: 'Ctrl+←/→', category: 'PANE', action: () => splitTerminal('horizontal') },
-    { label: 'Split Vertical', shortcut: 'Ctrl+↑/↓', category: 'PANE', action: () => splitTerminal('vertical') },
+    { label: 'Split Horizontal', shortcut: 'Ctrl+A/D', category: 'PANE', action: () => splitTerminal('horizontal') },
+    { label: 'Split Vertical', shortcut: 'Ctrl+W/S', category: 'PANE', action: () => splitTerminal('vertical') },
     { label: 'Close Pane', shortcut: 'Ctrl+Shift+W', category: 'PANE', action: () => closeTerminal(getActiveTerminalId()) },
     { label: 'New Workspace', shortcut: 'Ctrl+Shift+T', category: 'WORKSPACE', action: () => addWorkspace() },
     { label: 'Toggle Agent Panel', shortcut: 'Ctrl+Shift+A', category: 'AGENT', action: () => toggleAgentPanel() },

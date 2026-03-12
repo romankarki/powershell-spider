@@ -24,29 +24,30 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+Arrow: split panes (Left/Right = horizontal, Up/Down = vertical)
+      // Ctrl+WASD: split panes (A/D = horizontal, W/S = vertical)
       if (e.ctrlKey && !e.shiftKey && !e.altKey) {
-        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        const key = e.key.toLowerCase();
+        if (key === 'a' || key === 'd') {
           e.preventDefault();
           splitTerminal('horizontal');
           return;
         }
-        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        if (key === 'w' || key === 's') {
           e.preventDefault();
           splitTerminal('vertical');
           return;
         }
       }
 
-      // Alt+Ctrl+Arrow: spatial pane navigation
-      if (e.altKey && e.ctrlKey && !e.shiftKey) {
-        const dirMap: Record<string, NavDirection> = {
-          ArrowLeft: 'left',
-          ArrowRight: 'right',
-          ArrowUp: 'up',
-          ArrowDown: 'down',
+      // Alt+WASD: spatial pane navigation
+      if (e.altKey && !e.ctrlKey && !e.shiftKey) {
+        const wasdMap: Record<string, NavDirection> = {
+          a: 'left',
+          d: 'right',
+          w: 'up',
+          s: 'down',
         };
-        const navDir = dirMap[e.key];
+        const navDir = wasdMap[e.key.toLowerCase()];
         if (navDir) {
           e.preventDefault();
           const ws = useTerminalStore.getState().getActiveWorkspace();
