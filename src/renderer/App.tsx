@@ -6,6 +6,7 @@ import { StatusBar } from './components/StatusBar';
 import { CommandPalette } from './components/CommandPalette';
 import { AgentPanel } from './components/AgentPanel';
 import { QuickTerminal } from './components/QuickTerminal';
+import { SettingsPanel } from './components/SettingsPanel';
 import { useTerminalStore } from './state/terminal-store';
 import { findTerminalInDirection, NavDirection } from './state/split-tree';
 
@@ -22,10 +23,18 @@ const App: React.FC = () => {
   const toggleQuickTerminal = useTerminalStore((s) => s.toggleQuickTerminal);
   const addTabToPane = useTerminalStore((s) => s.addTabToPane);
   const switchTab = useTerminalStore((s) => s.switchTab);
+  const toggleSettings = useTerminalStore((s) => s.toggleSettings);
   const setActiveTerminal = useTerminalStore((s) => s.setActiveTerminal);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+,: open settings
+      if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key === ',') {
+        e.preventDefault();
+        toggleSettings();
+        return;
+      }
+
       // Ctrl+D: new terminal tab in active pane (Ghostty-style)
       if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'd') {
         e.preventDefault();
@@ -111,7 +120,7 @@ const App: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [splitTerminal, closeTerminal, getActiveTerminalId, addWorkspace, toggleAgentPanel, toggleCommandPalette, toggleSearch, toggleQuickTerminal, addTabToPane, switchTab, setActiveTerminal]);
+  }, [splitTerminal, closeTerminal, getActiveTerminalId, addWorkspace, toggleAgentPanel, toggleCommandPalette, toggleSearch, toggleQuickTerminal, addTabToPane, switchTab, toggleSettings, setActiveTerminal]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
@@ -126,6 +135,7 @@ const App: React.FC = () => {
       <StatusBar />
       <CommandPalette />
       <QuickTerminal />
+      <SettingsPanel />
     </div>
   );
 };
