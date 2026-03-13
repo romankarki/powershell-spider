@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useTerminal } from '../hooks/useTerminal';
 import { useTerminalStore } from '../state/terminal-store';
 import { SearchBar } from './SearchBar';
-import { PaneTabBar } from './PaneSidebar';
+import { PaneTabBar } from './PaneTabBar';
 
 interface TerminalPaneProps {
   id: string; // pane ID (leaf ID in the split tree)

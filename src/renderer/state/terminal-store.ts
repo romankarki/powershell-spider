@@ -63,7 +63,7 @@ function createWorkspace(name: string): Workspace {
 }
 
 export const useTerminalStore = create<TerminalStore>((set, get) => {
-  const initialWorkspace = createWorkspace('main');
+  const initialWorkspace = createWorkspace('PS 1');
   const initialTermId = (initialWorkspace.tree as { id: string }).id;
 
   return {
@@ -89,7 +89,7 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
     },
 
     addWorkspace: () => set((state) => {
-      const ws = createWorkspace(`workspace ${state.workspaces.length + 1}`);
+      const ws = createWorkspace(`PS ${state.workspaces.length + 1}`);
       const termId = (ws.tree as { id: string }).id;
       const terminals = new Map(state.terminals);
       terminals.set(termId, { id: termId, label: `PS ${terminals.size + 1}` });
