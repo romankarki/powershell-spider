@@ -20,6 +20,8 @@ const App: React.FC = () => {
   const toggleCommandPalette = useTerminalStore((s) => s.toggleCommandPalette);
   const toggleSearch = useTerminalStore((s) => s.toggleSearch);
   const toggleQuickTerminal = useTerminalStore((s) => s.toggleQuickTerminal);
+  const addTabToPane = useTerminalStore((s) => s.addTabToPane);
+  const switchTab = useTerminalStore((s) => s.switchTab);
   const setActiveTerminal = useTerminalStore((s) => s.setActiveTerminal);
 
   useEffect(() => {
@@ -57,6 +59,23 @@ const App: React.FC = () => {
         }
       }
 
+      // Ctrl+PageUp/PageDown: cycle tabs within active pane
+      if (e.ctrlKey && !e.shiftKey && !e.altKey) {
+        if (e.key === 'PageUp' || e.key === 'PageDown') {
+          e.preventDefault();
+          const state = useTerminalStore.getState();
+          const paneId = state.getActiveTerminalId();
+          const group = state.getPaneGroup(paneId);
+          if (group.tabIds.length > 1) {
+            const currentIdx = group.tabIds.indexOf(group.activeTabId);
+            const delta = e.key === 'PageDown' ? 1 : -1;
+            const nextIdx = (currentIdx + delta + group.tabIds.length) % group.tabIds.length;
+            switchTab(paneId, group.tabIds[nextIdx]);
+          }
+          return;
+        }
+      }
+
       // Ctrl+`: toggle quick terminal
       if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key === '`') {
         e.preventDefault();
@@ -86,13 +105,17 @@ const App: React.FC = () => {
             e.preventDefault();
             toggleSearch();
             break;
+          case 'E':
+            e.preventDefault();
+            addTabToPane(getActiveTerminalId());
+            break;
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [splitTerminal, closeTerminal, getActiveTerminalId, addWorkspace, toggleAgentPanel, toggleCommandPalette, toggleSearch, toggleQuickTerminal, setActiveTerminal]);
+  }, [splitTerminal, closeTerminal, getActiveTerminalId, addWorkspace, toggleAgentPanel, toggleCommandPalette, toggleSearch, toggleQuickTerminal, addTabToPane, switchTab, setActiveTerminal]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>

@@ -64,6 +64,8 @@ npm run package
 | Alt+W/A/S/D | Navigate between panes |
 | Ctrl+Shift+W | Close pane |
 | Ctrl+Shift+T | New workspace |
+| Ctrl+Shift+E | New tab in pane |
+| Ctrl+PgUp/PgDn | Cycle pane tabs |
 | Ctrl+Shift+F | Search terminal |
 | Ctrl+` | Quick terminal |
 | Ctrl+Shift+A | Toggle agent panel |
