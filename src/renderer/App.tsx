@@ -57,6 +57,17 @@ const App: React.FC = () => {
         return;
       }
 
+      // Alt+1-9: switch workspace by number
+      if (e.altKey && !e.ctrlKey && !e.shiftKey && e.key >= '1' && e.key <= '9') {
+        e.preventDefault();
+        const idx = parseInt(e.key) - 1;
+        const state = useTerminalStore.getState();
+        if (idx < state.workspaces.length) {
+          state.setActiveWorkspace(idx);
+        }
+        return;
+      }
+
       // Alt+WASD: spatial pane navigation
       if (e.altKey && !e.ctrlKey && !e.shiftKey) {
         const wasdMap: Record<string, NavDirection> = {
