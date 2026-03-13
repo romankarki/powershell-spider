@@ -40,6 +40,7 @@ interface TerminalStore {
   switchTab: (paneId: string, tabId: string) => void;
   closeTab: (paneId: string, tabId: string) => void;
   getPaneGroup: (paneId: string) => PaneGroup;
+  reorderTab: (paneId: string, fromIdx: number, toIdx: number) => void;
 
   // UI actions
   toggleAgentPanel: () => void;
@@ -285,6 +286,17 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
       terminals.delete(tabId);
 
       return { terminals, paneGroups };
+    }),
+
+    reorderTab: (paneId: string, fromIdx: number, toIdx: number) => set((state) => {
+      const paneGroups = new Map(state.paneGroups);
+      const group = paneGroups.get(paneId);
+      if (!group) return state;
+      const tabIds = [...group.tabIds];
+      const [moved] = tabIds.splice(fromIdx, 1);
+      tabIds.splice(toIdx, 0, moved);
+      paneGroups.set(paneId, { ...group, tabIds });
+      return { paneGroups };
     }),
 
     toggleAgentPanel: () => set((state) => ({ agentPanelOpen: !state.agentPanelOpen })),

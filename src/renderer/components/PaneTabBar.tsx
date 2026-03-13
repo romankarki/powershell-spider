@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTerminalStore } from '../state/terminal-store';
 
 interface PaneTabBarProps {
@@ -13,9 +13,12 @@ export const PaneTabBar: React.FC<PaneTabBarProps> = ({ paneId }) => {
   const closeTab = useTerminalStore((s) => s.closeTab);
   const closeTerminal = useTerminalStore((s) => s.closeTerminal);
   const renameTerminal = useTerminalStore((s) => s.renameTerminal);
+  const reorderTab = useTerminalStore((s) => s.reorderTab);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  const dragSrcIdx = useRef<number | null>(null);
 
   const handleDoubleClick = (tabId: string, label: string) => {
     setEditingId(tabId);
@@ -38,24 +41,58 @@ export const PaneTabBar: React.FC<PaneTabBarProps> = ({ paneId }) => {
     }
   };
 
+  const handleDragStart = (e: React.DragEvent, idx: number) => {
+    dragSrcIdx.current = idx;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(idx));
+  };
+
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIdx(idx);
+  };
+
+  const handleDrop = (e: React.DragEvent, toIdx: number) => {
+    e.preventDefault();
+    const fromIdx = dragSrcIdx.current;
+    if (fromIdx !== null && fromIdx !== toIdx) {
+      reorderTab(paneId, fromIdx, toIdx);
+    }
+    dragSrcIdx.current = null;
+    setDragOverIdx(null);
+  };
+
+  const handleDragEnd = () => {
+    dragSrcIdx.current = null;
+    setDragOverIdx(null);
+  };
+
   return (
     <div style={styles.tabBar}>
       <div style={styles.tabList}>
-        {paneGroup.tabIds.map((tabId) => {
+        {paneGroup.tabIds.map((tabId, idx) => {
           const info = terminals.get(tabId);
           const label = info?.label || tabId.slice(0, 6);
           const isActive = tabId === paneGroup.activeTabId;
+          const isDragOver = dragOverIdx === idx;
 
           return (
             <div
               key={tabId}
+              draggable
               onClick={() => switchTab(paneId, tabId)}
               onDoubleClick={() => handleDoubleClick(tabId, label)}
+              onDragStart={(e) => handleDragStart(e, idx)}
+              onDragOver={(e) => handleDragOver(e, idx)}
+              onDrop={(e) => handleDrop(e, idx)}
+              onDragEnd={handleDragEnd}
               style={{
                 ...styles.tab,
                 ...(isActive ? styles.tabActive : {}),
+                ...(isDragOver ? { borderLeft: '2px solid var(--green)' } : {}),
               }}
-              title={`${label} (double-click to rename)`}
+              title={`${label} (double-click to rename, drag to reorder)`}
             >
               {isActive && <div style={styles.activeTopLine} />}
               {editingId === tabId ? (
