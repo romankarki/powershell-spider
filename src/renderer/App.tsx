@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { TitleBar } from './components/TitleBar';
-import { TabBar } from './components/TabBar';
+import { WorkspaceSidebar } from './components/WorkspaceSidebar';
 import { SplitContainer } from './components/SplitContainer';
 import { StatusBar } from './components/StatusBar';
 import { CommandPalette } from './components/CommandPalette';
@@ -126,8 +126,8 @@ const App: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       <TitleBar />
-      <TabBar />
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        <WorkspaceSidebar />
         <div style={{ flex: 1, overflow: 'hidden' }}>
           <SplitContainer node={workspace.tree} />
         </div>
