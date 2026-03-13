@@ -5,7 +5,13 @@ import { findAllTerminalIds } from '../state/split-tree';
 export const AgentPanel: React.FC = () => {
   const workspace = useTerminalStore((s) => s.getActiveWorkspace());
   const terminals = useTerminalStore((s) => s.terminals);
-  const allIds = findAllTerminalIds(workspace.tree);
+  const paneGroups = useTerminalStore((s) => s.paneGroups);
+  // Expand pane IDs to all terminal IDs across all pane groups
+  const paneIds = findAllTerminalIds(workspace.tree);
+  const allIds = paneIds.flatMap((paneId) => {
+    const group = paneGroups.get(paneId);
+    return group ? group.tabIds : [paneId];
+  });
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [command, setCommand] = useState('');
