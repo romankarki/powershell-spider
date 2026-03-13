@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { Terminal } from '@xterm/xterm';
+import { Terminal, ITheme } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { SearchAddon, ISearchOptions } from '@xterm/addon-search';
+import { THEMES, DEFAULT_THEME, ThemeId } from '../themes';
 import '@xterm/xterm/css/xterm.css';
 
 declare global {
@@ -22,29 +23,12 @@ declare global {
   }
 }
 
-const XTERM_THEME = {
-  background: '#0a0a0a',
-  foreground: '#e0e0e0',
-  cursor: '#00ff41',
-  cursorAccent: '#0a0a0a',
-  selectionBackground: 'rgba(0, 255, 65, 0.2)',
-  black: '#0a0a0a',
-  red: '#ff0040',
-  green: '#00ff41',
-  yellow: '#ffea00',
-  blue: '#00e5ff',
-  magenta: '#ff00ff',
-  cyan: '#00e5ff',
-  white: '#e0e0e0',
-  brightBlack: '#555555',
-  brightRed: '#ff4466',
-  brightGreen: '#66ff66',
-  brightYellow: '#ffff66',
-  brightBlue: '#66ffff',
-  brightMagenta: '#ff66ff',
-  brightCyan: '#66ffff',
-  brightWhite: '#ffffff',
-};
+// Current theme ID, updated by applyTheme()
+let currentThemeId: ThemeId = DEFAULT_THEME;
+
+function getTerminalTheme(): ITheme {
+  return THEMES[currentThemeId]?.terminal ?? THEMES[DEFAULT_THEME].terminal;
+}
 
 // Persistent registry: terminal instances survive React unmount/remount cycles.
 // This is critical for split operations — when a leaf becomes nested in a split node,
@@ -125,7 +109,7 @@ export function useTerminal(
       container.appendChild(wrapper);
 
       const term = new Terminal({
-        theme: XTERM_THEME,
+        theme: getTerminalTheme(),
         fontFamily: "'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace",
         fontSize: 14,
         cursorBlink: true,
@@ -200,6 +184,33 @@ export function useTerminal(
   }, [isActive]);
 
   return { termRef, fitRef };
+}
+
+// --- Theme API ---
+
+/** Apply a theme to all existing terminals and update CSS variables. */
+export function applyTheme(themeId: ThemeId): void {
+  currentThemeId = themeId;
+  const theme = THEMES[themeId];
+  if (!theme) return;
+
+  // Update all existing xterm instances
+  for (const entry of registry.values()) {
+    entry.terminal.options.theme = theme.terminal;
+  }
+
+  // Update CSS variables on :root
+  const root = document.documentElement;
+  root.style.setProperty('--bg-primary', theme.ui.bgPrimary);
+  root.style.setProperty('--bg-secondary', theme.ui.bgSecondary);
+  root.style.setProperty('--bg-tertiary', theme.ui.bgTertiary);
+  root.style.setProperty('--green', theme.ui.accent);
+  root.style.setProperty('--green-dim', theme.ui.accentDim);
+  root.style.setProperty('--green-glow', theme.ui.accentGlow);
+  root.style.setProperty('--border', theme.ui.border);
+  root.style.setProperty('--border-active', theme.ui.borderActive);
+  root.style.setProperty('--text-primary', theme.ui.textPrimary);
+  root.style.setProperty('--text-secondary', theme.ui.textSecondary);
 }
 
 // --- Search API ---

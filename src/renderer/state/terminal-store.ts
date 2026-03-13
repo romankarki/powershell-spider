@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { v4 as uuid } from 'uuid';
 import { Workspace, TreeNode, SplitDirection, TerminalInfo, PaneGroup } from '../types';
 import { createLeaf, splitNode, removeNode, findAllTerminalIds, findNextTerminalId } from './split-tree';
-import { destroyTerminal } from '../hooks/useTerminal';
+import { destroyTerminal, applyTheme } from '../hooks/useTerminal';
+import { ThemeId, DEFAULT_THEME } from '../themes';
 
 interface TerminalStore {
   workspaces: Workspace[];
@@ -14,6 +15,8 @@ interface TerminalStore {
   searchOpenTerminalId: string | null;
   quickTerminalOpen: boolean;
   quickTerminalId: string | null;
+  currentTheme: ThemeId;
+  settingsOpen: boolean;
 
   // Getters
   getActiveWorkspace: () => Workspace;
@@ -45,6 +48,8 @@ interface TerminalStore {
   toggleSearch: () => void;
   closeSearch: () => void;
   toggleQuickTerminal: () => void;
+  setTheme: (themeId: ThemeId) => void;
+  toggleSettings: () => void;
 }
 
 function createWorkspace(name: string): Workspace {
@@ -71,6 +76,8 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
     searchOpenTerminalId: null,
     quickTerminalOpen: false,
     quickTerminalId: null,
+    currentTheme: DEFAULT_THEME,
+    settingsOpen: false,
 
     getActiveWorkspace: () => {
       const state = get();
@@ -304,5 +311,10 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
       }
       return { quickTerminalOpen: true };
     }),
+    setTheme: (themeId: ThemeId) => {
+      applyTheme(themeId);
+      set({ currentTheme: themeId });
+    },
+    toggleSettings: () => set((state) => ({ settingsOpen: !state.settingsOpen })),
   };
 });
