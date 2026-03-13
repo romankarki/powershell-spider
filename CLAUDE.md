@@ -63,7 +63,7 @@ npm run package
 | Ctrl+W | Close active tab (or pane if last tab) |
 | Ctrl+PgUp/PgDn | Cycle pane tabs |
 | Ctrl+Shift+H | Split horizontal |
-| Ctrl+Shift+V | Split vertical |
+| Ctrl+Shift+B | Split vertical |
 | Ctrl+Shift+W | Close pane |
 | Alt+W/A/S/D | Navigate between panes |
 | Alt+1-9 | Switch workspace by number |

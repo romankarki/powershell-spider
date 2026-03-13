@@ -116,7 +116,7 @@ const App: React.FC = () => {
             e.preventDefault();
             splitTerminal('horizontal');
             break;
-          case 'V':
+          case 'B':
             e.preventDefault();
             splitTerminal('vertical');
             break;

@@ -28,7 +28,7 @@ export const CommandPalette: React.FC = () => {
   const commands: Command[] = [
     { label: 'New Tab in Pane', shortcut: 'Ctrl+D', category: 'PANE', action: () => addTabToPane(getActiveTerminalId()) },
     { label: 'Split Horizontal', shortcut: 'Ctrl+Shift+H', category: 'PANE', action: () => splitTerminal('horizontal') },
-    { label: 'Split Vertical', shortcut: 'Ctrl+Shift+V', category: 'PANE', action: () => splitTerminal('vertical') },
+    { label: 'Split Vertical', shortcut: 'Ctrl+Shift+B', category: 'PANE', action: () => splitTerminal('vertical') },
     { label: 'Close Tab', shortcut: 'Ctrl+W', category: 'PANE', action: () => {
       const state = useTerminalStore.getState();
       const paneId = state.getActiveTerminalId();
