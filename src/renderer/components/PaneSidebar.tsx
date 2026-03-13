@@ -121,8 +121,8 @@ export const PaneSidebar: React.FC<PaneSidebarProps> = ({ paneId }) => {
 
 const styles: Record<string, React.CSSProperties> = {
   sidebar: {
-    width: 130,
-    minWidth: 130,
+    width: 170,
+    minWidth: 170,
     background: 'var(--bg-secondary)',
     borderRight: '1px solid var(--border)',
     display: 'flex',
@@ -138,8 +138,8 @@ const styles: Record<string, React.CSSProperties> = {
   tab: {
     display: 'flex',
     alignItems: 'center',
-    gap: 4,
-    padding: '6px 6px 6px 0',
+    gap: 6,
+    padding: '8px 8px 8px 0',
     cursor: 'pointer',
     borderBottom: '1px solid var(--border)',
     transition: 'background 0.1s',
@@ -167,7 +167,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   tabLabel: {
     fontFamily: 'var(--font-mono)',
-    fontSize: 11,
+    fontSize: 12,
     whiteSpace: 'nowrap' as const,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -179,7 +179,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid var(--green)',
     color: 'var(--green)',
     fontFamily: 'var(--font-mono)',
-    fontSize: 11,
+    fontSize: 12,
     outline: 'none',
     padding: '0 2px',
     width: '100%',
