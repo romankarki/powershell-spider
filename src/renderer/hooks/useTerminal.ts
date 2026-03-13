@@ -110,7 +110,7 @@ export function useTerminal(
 
       const term = new Terminal({
         theme: getTerminalTheme(),
-        fontFamily: "'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace",
+        fontFamily: "'JetBrainsMono Nerd Font', 'CaskaydiaCove Nerd Font', 'Hack Nerd Font', 'FiraCode Nerd Font', 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace",
         fontSize: 14,
         cursorBlink: true,
         cursorStyle: 'block',
