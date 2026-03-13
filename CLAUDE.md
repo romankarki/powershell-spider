@@ -60,11 +60,13 @@ npm run package
 | Shortcut | Action |
 |---|---|
 | Ctrl+D | New tab in pane |
+| Ctrl+W | Close active tab (or pane if last tab) |
 | Ctrl+PgUp/PgDn | Cycle pane tabs |
 | Ctrl+Shift+H | Split horizontal |
 | Ctrl+Shift+V | Split vertical |
-| Alt+W/A/S/D | Navigate between panes |
 | Ctrl+Shift+W | Close pane |
+| Alt+W/A/S/D | Navigate between panes |
+| Alt+1-9 | Switch workspace by number |
 | Ctrl+Shift+T | New workspace |
 | Ctrl+Shift+F | Search terminal |
 | Ctrl+` | Quick terminal |
