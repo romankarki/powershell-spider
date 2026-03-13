@@ -26,19 +26,11 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+WASD: split panes (A/D = horizontal, W/S = vertical)
-      if (e.ctrlKey && !e.shiftKey && !e.altKey) {
-        const key = e.key.toLowerCase();
-        if (key === 'a' || key === 'd') {
-          e.preventDefault();
-          splitTerminal('horizontal');
-          return;
-        }
-        if (key === 'w' || key === 's') {
-          e.preventDefault();
-          splitTerminal('vertical');
-          return;
-        }
+      // Ctrl+D: new terminal tab in active pane (Ghostty-style)
+      if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        addTabToPane(getActiveTerminalId());
+        return;
       }
 
       // Alt+WASD: spatial pane navigation
@@ -85,6 +77,14 @@ const App: React.FC = () => {
 
       if (e.ctrlKey && e.shiftKey) {
         switch (e.key.toUpperCase()) {
+          case 'H':
+            e.preventDefault();
+            splitTerminal('horizontal');
+            break;
+          case 'V':
+            e.preventDefault();
+            splitTerminal('vertical');
+            break;
           case 'W':
             e.preventDefault();
             closeTerminal(getActiveTerminalId());
@@ -104,10 +104,6 @@ const App: React.FC = () => {
           case 'F':
             e.preventDefault();
             toggleSearch();
-            break;
-          case 'E':
-            e.preventDefault();
-            addTabToPane(getActiveTerminalId());
             break;
         }
       }

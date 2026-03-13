@@ -59,13 +59,13 @@ npm run package
 
 | Shortcut | Action |
 |---|---|
-| Ctrl+A/D | Split horizontal |
-| Ctrl+W/S | Split vertical |
+| Ctrl+D | New tab in pane |
+| Ctrl+PgUp/PgDn | Cycle pane tabs |
+| Ctrl+Shift+H | Split horizontal |
+| Ctrl+Shift+V | Split vertical |
 | Alt+W/A/S/D | Navigate between panes |
 | Ctrl+Shift+W | Close pane |
 | Ctrl+Shift+T | New workspace |
-| Ctrl+Shift+E | New tab in pane |
-| Ctrl+PgUp/PgDn | Cycle pane tabs |
 | Ctrl+Shift+F | Search terminal |
 | Ctrl+` | Quick terminal |
 | Ctrl+Shift+A | Toggle agent panel |

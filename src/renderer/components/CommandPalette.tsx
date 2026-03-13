@@ -25,14 +25,14 @@ export const CommandPalette: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const commands: Command[] = [
-    { label: 'Split Horizontal', shortcut: 'Ctrl+A/D', category: 'PANE', action: () => splitTerminal('horizontal') },
-    { label: 'Split Vertical', shortcut: 'Ctrl+W/S', category: 'PANE', action: () => splitTerminal('vertical') },
+    { label: 'New Tab in Pane', shortcut: 'Ctrl+D', category: 'PANE', action: () => addTabToPane(getActiveTerminalId()) },
+    { label: 'Split Horizontal', shortcut: 'Ctrl+Shift+H', category: 'PANE', action: () => splitTerminal('horizontal') },
+    { label: 'Split Vertical', shortcut: 'Ctrl+Shift+V', category: 'PANE', action: () => splitTerminal('vertical') },
     { label: 'Close Pane', shortcut: 'Ctrl+Shift+W', category: 'PANE', action: () => closeTerminal(getActiveTerminalId()) },
     { label: 'New Workspace', shortcut: 'Ctrl+Shift+T', category: 'WORKSPACE', action: () => addWorkspace() },
     { label: 'Toggle Agent Panel', shortcut: 'Ctrl+Shift+A', category: 'AGENT', action: () => toggleAgentPanel() },
     { label: 'Search Terminal', shortcut: 'Ctrl+Shift+F', category: 'PANE', action: () => toggleSearch() },
     { label: 'Quick Terminal', shortcut: 'Ctrl+`', category: 'PANE', action: () => toggleQuickTerminal() },
-    { label: 'New Tab in Pane', shortcut: 'Ctrl+Shift+E', category: 'PANE', action: () => addTabToPane(getActiveTerminalId()) },
   ];
 
   const filtered = commands.filter((c) =>
