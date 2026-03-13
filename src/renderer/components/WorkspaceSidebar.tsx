@@ -156,8 +156,8 @@ export const WorkspaceSidebar: React.FC = () => {
 
 const styles: Record<string, React.CSSProperties> = {
   sidebar: {
-    width: 180,
-    minWidth: 180,
+    width: 220,
+    minWidth: 220,
     background: 'var(--bg-secondary)',
     borderRight: '1px solid var(--border)',
     display: 'flex',
