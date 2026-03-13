@@ -29,6 +29,13 @@ export const CommandPalette: React.FC = () => {
     { label: 'New Tab in Pane', shortcut: 'Ctrl+D', category: 'PANE', action: () => addTabToPane(getActiveTerminalId()) },
     { label: 'Split Horizontal', shortcut: 'Ctrl+Shift+H', category: 'PANE', action: () => splitTerminal('horizontal') },
     { label: 'Split Vertical', shortcut: 'Ctrl+Shift+V', category: 'PANE', action: () => splitTerminal('vertical') },
+    { label: 'Close Tab', shortcut: 'Ctrl+W', category: 'PANE', action: () => {
+      const state = useTerminalStore.getState();
+      const paneId = state.getActiveTerminalId();
+      const group = state.getPaneGroup(paneId);
+      if (group.tabIds.length > 1) state.closeTab(paneId, group.activeTabId);
+      else closeTerminal(paneId);
+    }},
     { label: 'Close Pane', shortcut: 'Ctrl+Shift+W', category: 'PANE', action: () => closeTerminal(getActiveTerminalId()) },
     { label: 'New Workspace', shortcut: 'Ctrl+Shift+T', category: 'WORKSPACE', action: () => addWorkspace() },
     { label: 'Toggle Agent Panel', shortcut: 'Ctrl+Shift+A', category: 'AGENT', action: () => toggleAgentPanel() },

@@ -25,6 +25,7 @@ const App: React.FC = () => {
   const switchTab = useTerminalStore((s) => s.switchTab);
   const toggleSettings = useTerminalStore((s) => s.toggleSettings);
   const setActiveTerminal = useTerminalStore((s) => s.setActiveTerminal);
+  const closeTab = useTerminalStore((s) => s.closeTab);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -39,6 +40,20 @@ const App: React.FC = () => {
       if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'd') {
         e.preventDefault();
         addTabToPane(getActiveTerminalId());
+        return;
+      }
+
+      // Ctrl+W: close active tab (closes pane if last tab)
+      if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'w') {
+        e.preventDefault();
+        const state = useTerminalStore.getState();
+        const paneId = state.getActiveTerminalId();
+        const group = state.getPaneGroup(paneId);
+        if (group.tabIds.length > 1) {
+          closeTab(paneId, group.activeTabId);
+        } else {
+          closeTerminal(paneId);
+        }
         return;
       }
 
@@ -121,7 +136,7 @@ const App: React.FC = () => {
     // Use capture phase so we intercept before xterm processes the key
     window.addEventListener('keydown', handleKeyDown, true);
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [splitTerminal, closeTerminal, getActiveTerminalId, addWorkspace, toggleAgentPanel, toggleCommandPalette, toggleSearch, toggleQuickTerminal, addTabToPane, switchTab, toggleSettings, setActiveTerminal]);
+  }, [splitTerminal, closeTerminal, getActiveTerminalId, addWorkspace, toggleAgentPanel, toggleCommandPalette, toggleSearch, toggleQuickTerminal, addTabToPane, switchTab, toggleSettings, setActiveTerminal, closeTab]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
