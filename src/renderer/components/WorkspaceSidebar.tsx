@@ -1,5 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useTerminalStore } from '../state/terminal-store';
+
+const DEFAULT_WIDTH = 242;
+const MIN_WIDTH = 160;
+const MAX_WIDTH = 450;
 
 export const WorkspaceSidebar: React.FC = () => {
   const workspaces = useTerminalStore((s) => s.workspaces);
@@ -14,6 +18,8 @@ export const WorkspaceSidebar: React.FC = () => {
 
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [width, setWidth] = useState(DEFAULT_WIDTH);
+  const isResizing = useRef(false);
 
   const commitRename = () => {
     if (editIndex !== null && editValue.trim()) {
@@ -22,8 +28,34 @@ export const WorkspaceSidebar: React.FC = () => {
     setEditIndex(null);
   };
 
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isResizing.current = true;
+    const startX = e.clientX;
+    const startWidth = width;
+
+    const handleMouseMove = (ev: MouseEvent) => {
+      if (!isResizing.current) return;
+      const newWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth + (ev.clientX - startX)));
+      setWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      isResizing.current = false;
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [width]);
+
   return (
-    <div style={styles.sidebar}>
+    <div style={{ ...styles.sidebar, width, minWidth: MIN_WIDTH }}>
       {/* Header */}
       <div style={styles.header}>
         <span style={styles.headerLabel}>SPACES</span>
@@ -150,14 +182,19 @@ export const WorkspaceSidebar: React.FC = () => {
           &#9881; SETTINGS
         </button>
       </div>
+
+      {/* Resize handle */}
+      <div
+        onMouseDown={handleMouseDown}
+        style={styles.resizeHandle}
+      />
     </div>
   );
 };
 
 const styles: Record<string, React.CSSProperties> = {
   sidebar: {
-    width: 220,
-    minWidth: 220,
+    position: 'relative' as const,
     background: 'var(--bg-secondary)',
     borderRight: '1px solid var(--border)',
     display: 'flex',
@@ -167,12 +204,12 @@ const styles: Record<string, React.CSSProperties> = {
     userSelect: 'none' as const,
   },
   header: {
-    padding: '10px 12px 8px',
+    padding: '12px 14px 10px',
     borderBottom: '1px solid var(--border)',
   },
   headerLabel: {
     fontFamily: 'var(--font-mono)',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: 700,
     letterSpacing: 2,
     color: 'var(--text-secondary)',
@@ -184,8 +221,8 @@ const styles: Record<string, React.CSSProperties> = {
   item: {
     display: 'flex',
     alignItems: 'center',
-    gap: 6,
-    padding: '8px 8px 8px 0',
+    gap: 8,
+    padding: '10px 10px 10px 0',
     cursor: 'pointer',
     borderBottom: '1px solid var(--border)',
     transition: 'background 0.1s',
@@ -196,21 +233,21 @@ const styles: Record<string, React.CSSProperties> = {
   indicator: {
     width: 3,
     flexShrink: 0,
-    height: 22,
+    height: 24,
   },
   activeBar: {
     width: 3,
-    height: 22,
+    height: 24,
     background: 'var(--green)',
     borderRadius: '0 2px 2px 0',
     boxShadow: '0 0 6px var(--green-glow)',
   },
   itemNumber: {
     fontFamily: 'var(--font-mono)',
-    fontSize: 9,
+    fontSize: 10,
     color: 'var(--text-secondary)',
     opacity: 0.5,
-    width: 12,
+    width: 14,
     textAlign: 'center' as const,
     flexShrink: 0,
   },
@@ -221,7 +258,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   itemLabel: {
     fontFamily: 'var(--font-mono)',
-    fontSize: 12,
+    fontSize: 14,
     whiteSpace: 'nowrap' as const,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -233,7 +270,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid var(--green)',
     color: 'var(--green)',
     fontFamily: 'var(--font-mono)',
-    fontSize: 12,
+    fontSize: 14,
     outline: 'none',
     padding: '0 4px',
     width: '100%',
@@ -244,7 +281,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: 'none',
     color: 'var(--text-secondary)',
     cursor: 'pointer',
-    fontSize: 14,
+    fontSize: 16,
     lineHeight: 1,
     padding: '0 4px',
     flexShrink: 0,
@@ -259,19 +296,19 @@ const styles: Record<string, React.CSSProperties> = {
     color: 'var(--text-secondary)',
     cursor: 'pointer',
     fontFamily: 'var(--font-mono)',
-    fontSize: 11,
-    padding: '8px 12px',
+    fontSize: 12,
+    padding: '10px 14px',
     textAlign: 'left' as const,
     transition: 'all 0.1s',
     flexShrink: 0,
     letterSpacing: 0.5,
   },
   bottomControls: {
-    padding: '8px',
+    padding: '10px',
     borderTop: '1px solid var(--border)',
     display: 'flex',
     flexDirection: 'column',
-    gap: 4,
+    gap: 6,
   },
   controlBtn: {
     background: 'transparent',
@@ -279,12 +316,21 @@ const styles: Record<string, React.CSSProperties> = {
     color: 'var(--text-secondary)',
     cursor: 'pointer',
     fontFamily: 'var(--font-mono)',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: 600,
     letterSpacing: 1,
-    padding: '6px 8px',
+    padding: '7px 10px',
     borderRadius: 3,
     textAlign: 'left' as const,
     transition: 'all 0.15s',
+  },
+  resizeHandle: {
+    position: 'absolute' as const,
+    top: 0,
+    right: -3,
+    width: 6,
+    height: '100%',
+    cursor: 'col-resize',
+    zIndex: 10,
   },
 };
