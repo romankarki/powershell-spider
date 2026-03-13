@@ -2,30 +2,37 @@ import React, { useRef, useState } from 'react';
 import { useTerminal } from '../hooks/useTerminal';
 import { useTerminalStore } from '../state/terminal-store';
 import { SearchBar } from './SearchBar';
+import { PaneSidebar } from './PaneSidebar';
 
 interface TerminalPaneProps {
-  id: string;
+  id: string; // pane ID (leaf ID in the split tree)
 }
 
 export const TerminalPane: React.FC<TerminalPaneProps> = ({ id }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const activeId = useTerminalStore((s) => s.getActiveWorkspace().activeTerminalId);
+  const activePaneId = useTerminalStore((s) => s.getActiveWorkspace().activeTerminalId);
   const setActive = useTerminalStore((s) => s.setActiveTerminal);
   const terminals = useTerminalStore((s) => s.terminals);
   const renameTerminal = useTerminalStore((s) => s.renameTerminal);
-  const isActive = activeId === id;
+  const addTabToPane = useTerminalStore((s) => s.addTabToPane);
+  const paneGroup = useTerminalStore((s) => s.getPaneGroup(id));
+  const isPaneActive = activePaneId === id;
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
 
   const searchOpenTerminalId = useTerminalStore((s) => s.searchOpenTerminalId);
   const closeSearch = useTerminalStore((s) => s.closeSearch);
-  const showSearch = searchOpenTerminalId === id;
 
-  const termInfo = terminals.get(id);
-  useTerminal(id, containerRef, isActive, () => setActive(id), termInfo?.cwd);
+  // The active tab's terminal ID - this is what we render
+  const activeTabId = paneGroup.activeTabId;
+  const showSearch = searchOpenTerminalId === id || searchOpenTerminalId === activeTabId;
+  const hasTabs = paneGroup.tabIds.length > 1;
 
-  const label = termInfo?.label || id.slice(0, 8);
+  const termInfo = terminals.get(activeTabId);
+  useTerminal(activeTabId, containerRef, isPaneActive, () => setActive(id), termInfo?.cwd);
+
+  const label = termInfo?.label || activeTabId.slice(0, 8);
 
   const handleDoubleClick = () => {
     setEditValue(label);
@@ -34,50 +41,89 @@ export const TerminalPane: React.FC<TerminalPaneProps> = ({ id }) => {
 
   const commitRename = () => {
     if (editValue.trim()) {
-      renameTerminal(id, editValue.trim());
+      renameTerminal(activeTabId, editValue.trim());
     }
     setIsEditing(false);
   };
 
   return (
     <div
-      className={`terminal-pane ${isActive ? 'active' : ''}`}
+      className={`terminal-pane ${isPaneActive ? 'active' : ''}`}
       onClick={() => setActive(id)}
-      style={{ position: 'relative' }}
+      style={{ position: 'relative', display: 'flex', flexDirection: 'column' }}
     >
-      {showSearch && <SearchBar terminalId={id} onClose={closeSearch} />}
+      {showSearch && <SearchBar terminalId={activeTabId} onClose={closeSearch} />}
       <div className="terminal-header">
-        {isEditing ? (
-          <input
-            autoFocus
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={commitRename}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') commitRename();
-              if (e.key === 'Escape') setIsEditing(false);
-            }}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {isEditing ? (
+            <input
+              autoFocus
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') commitRename();
+                if (e.key === 'Escape') setIsEditing(false);
+              }}
+              style={{
+                background: 'transparent',
+                border: '1px solid var(--green)',
+                color: 'var(--green)',
+                fontFamily: 'inherit',
+                fontSize: 'inherit',
+                outline: 'none',
+                padding: '0 4px',
+                width: '120px',
+              }}
+            />
+          ) : (
+            <span className="terminal-label" onDoubleClick={handleDoubleClick}>
+              {label}
+            </span>
+          )}
+          {hasTabs && (
+            <span style={{
+              color: 'var(--green-dim)',
+              fontSize: '9px',
+              fontFamily: 'var(--font-mono)',
+              opacity: 0.7,
+            }}>
+              [{paneGroup.tabIds.indexOf(activeTabId) + 1}/{paneGroup.tabIds.length}]
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); addTabToPane(id); }}
+            title="Add tab to this pane"
             style={{
               background: 'transparent',
-              border: '1px solid var(--green)',
-              color: 'var(--green)',
-              fontFamily: 'inherit',
-              fontSize: 'inherit',
-              outline: 'none',
-              padding: '0 4px',
-              width: '120px',
+              border: 'none',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              fontFamily: 'var(--font-mono)',
+              fontSize: 14,
+              lineHeight: 1,
+              padding: '0 2px',
+              transition: 'color 0.1s',
             }}
-          />
-        ) : (
-          <span className="terminal-label" onDoubleClick={handleDoubleClick}>
-            {label}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--green)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
+          >
+            +
+          </button>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '10px' }}>
+            {activeTabId.slice(0, 8)}
           </span>
-        )}
-        <span style={{ color: 'var(--text-secondary)', fontSize: '10px' }}>
-          {id.slice(0, 8)}
-        </span>
+        </div>
       </div>
-      <div className="terminal-body" ref={containerRef} />
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
+        {hasTabs && <PaneSidebar paneId={id} />}
+        <div className="terminal-body-flex" ref={containerRef} style={{
+          flex: 1,
+          overflow: 'hidden',
+        }} />
+      </div>
     </div>
   );
 };
