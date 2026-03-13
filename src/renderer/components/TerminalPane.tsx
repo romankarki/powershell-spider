@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useTerminal } from '../hooks/useTerminal';
 import { useTerminalStore } from '../state/terminal-store';
 import { SearchBar } from './SearchBar';
-import { PaneSidebar } from './PaneSidebar';
+import { PaneTabBar } from './PaneSidebar';
 
 interface TerminalPaneProps {
   id: string; // pane ID (leaf ID in the split tree)
@@ -53,77 +53,72 @@ export const TerminalPane: React.FC<TerminalPaneProps> = ({ id }) => {
       style={{ position: 'relative', display: 'flex', flexDirection: 'column' }}
     >
       {showSearch && <SearchBar terminalId={activeTabId} onClose={closeSearch} />}
-      <div className="terminal-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {isEditing ? (
-            <input
-              autoFocus
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              onBlur={commitRename}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') commitRename();
-                if (e.key === 'Escape') setIsEditing(false);
-              }}
+
+      {/* Show tab bar when multiple tabs, otherwise simple header */}
+      {hasTabs ? (
+        <PaneTabBar paneId={id} />
+      ) : (
+        <div className="terminal-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {isEditing ? (
+              <input
+                autoFocus
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={commitRename}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') commitRename();
+                  if (e.key === 'Escape') setIsEditing(false);
+                }}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid var(--green)',
+                  color: 'var(--green)',
+                  fontFamily: 'inherit',
+                  fontSize: 'inherit',
+                  outline: 'none',
+                  padding: '0 4px',
+                  width: '120px',
+                }}
+              />
+            ) : (
+              <span className="terminal-label" onDoubleClick={handleDoubleClick}>
+                {label}
+              </span>
+            )}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <button
+              onClick={(e) => { e.stopPropagation(); addTabToPane(id); }}
+              title="Add tab (Ctrl+D)"
               style={{
                 background: 'transparent',
-                border: '1px solid var(--green)',
-                color: 'var(--green)',
-                fontFamily: 'inherit',
-                fontSize: 'inherit',
-                outline: 'none',
-                padding: '0 4px',
-                width: '120px',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 14,
+                lineHeight: 1,
+                padding: '0 2px',
+                transition: 'color 0.1s',
               }}
-            />
-          ) : (
-            <span className="terminal-label" onDoubleClick={handleDoubleClick}>
-              {label}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--green)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
+            >
+              +
+            </button>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '10px' }}>
+              {activeTabId.slice(0, 8)}
             </span>
-          )}
-          {hasTabs && (
-            <span style={{
-              color: 'var(--green-dim)',
-              fontSize: '9px',
-              fontFamily: 'var(--font-mono)',
-              opacity: 0.7,
-            }}>
-              [{paneGroup.tabIds.indexOf(activeTabId) + 1}/{paneGroup.tabIds.length}]
-            </span>
-          )}
+          </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <button
-            onClick={(e) => { e.stopPropagation(); addTabToPane(id); }}
-            title="Add tab to this pane"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              fontFamily: 'var(--font-mono)',
-              fontSize: 14,
-              lineHeight: 1,
-              padding: '0 2px',
-              transition: 'color 0.1s',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--green)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
-          >
-            +
-          </button>
-          <span style={{ color: 'var(--text-secondary)', fontSize: '10px' }}>
-            {activeTabId.slice(0, 8)}
-          </span>
-        </div>
-      </div>
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
-        {hasTabs && <PaneSidebar paneId={id} />}
-        <div className="terminal-body-flex" ref={containerRef} style={{
-          flex: 1,
-          overflow: 'hidden',
-        }} />
-      </div>
+      )}
+
+      {/* Terminal body fills remaining space */}
+      <div className="terminal-body-flex" ref={containerRef} style={{
+        flex: 1,
+        overflow: 'hidden',
+      }} />
     </div>
   );
 };

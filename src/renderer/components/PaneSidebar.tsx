@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useTerminalStore } from '../state/terminal-store';
 
-interface PaneSidebarProps {
+interface PaneTabBarProps {
   paneId: string;
 }
 
-export const PaneSidebar: React.FC<PaneSidebarProps> = ({ paneId }) => {
+export const PaneTabBar: React.FC<PaneTabBarProps> = ({ paneId }) => {
   const paneGroup = useTerminalStore((s) => s.getPaneGroup(paneId));
   const terminals = useTerminalStore((s) => s.terminals);
   const switchTab = useTerminalStore((s) => s.switchTab);
@@ -39,7 +39,7 @@ export const PaneSidebar: React.FC<PaneSidebarProps> = ({ paneId }) => {
   };
 
   return (
-    <div style={styles.sidebar}>
+    <div style={styles.tabBar}>
       <div style={styles.tabList}>
         {paneGroup.tabIds.map((tabId) => {
           const info = terminals.get(tabId);
@@ -55,44 +55,36 @@ export const PaneSidebar: React.FC<PaneSidebarProps> = ({ paneId }) => {
                 ...styles.tab,
                 ...(isActive ? styles.tabActive : {}),
               }}
-              title={label}
+              title={`${label} (double-click to rename)`}
             >
-              <div style={styles.tabIndicator}>
-                {isActive && <div style={styles.activeIndicator} />}
-              </div>
-              <div style={styles.tabContent}>
-                {editingId === tabId ? (
-                  <input
-                    autoFocus
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onBlur={() => commitRename(tabId)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') commitRename(tabId);
-                      if (e.key === 'Escape') setEditingId(null);
-                      e.stopPropagation();
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                    style={styles.renameInput}
-                  />
-                ) : (
-                  <span style={{
-                    ...styles.tabLabel,
-                    color: isActive ? 'var(--green)' : 'var(--text-secondary)',
-                  }}>
-                    {label}
-                  </span>
-                )}
-              </div>
+              {isActive && <div style={styles.activeTopLine} />}
+              {editingId === tabId ? (
+                <input
+                  autoFocus
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  onBlur={() => commitRename(tabId)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') commitRename(tabId);
+                    if (e.key === 'Escape') setEditingId(null);
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  style={styles.renameInput}
+                />
+              ) : (
+                <span style={{
+                  ...styles.tabLabel,
+                  color: isActive ? 'var(--green)' : 'var(--text-secondary)',
+                }}>
+                  {label}
+                </span>
+              )}
               <button
                 onClick={(e) => handleCloseTab(e, tabId)}
                 style={styles.closeBtn}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'var(--red)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'var(--text-secondary)';
-                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--red)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
               >
                 ×
               </button>
@@ -103,15 +95,9 @@ export const PaneSidebar: React.FC<PaneSidebarProps> = ({ paneId }) => {
       <button
         onClick={() => addTabToPane(paneId)}
         style={styles.addBtn}
-        title="New tab in this pane"
-        onMouseEnter={(e) => {
-          e.currentTarget.style.color = 'var(--green)';
-          e.currentTarget.style.borderColor = 'var(--green-dim)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.color = 'var(--text-secondary)';
-          e.currentTarget.style.borderColor = 'var(--border)';
-        }}
+        title="New tab (Ctrl+D)"
+        onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--green)'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
       >
         +
       </button>
@@ -120,58 +106,53 @@ export const PaneSidebar: React.FC<PaneSidebarProps> = ({ paneId }) => {
 };
 
 const styles: Record<string, React.CSSProperties> = {
-  sidebar: {
-    width: 170,
-    minWidth: 170,
-    background: 'var(--bg-secondary)',
-    borderRight: '1px solid var(--border)',
+  tabBar: {
     display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
+    alignItems: 'center',
+    height: 28,
+    minHeight: 28,
+    background: 'var(--bg-secondary)',
+    borderBottom: '1px solid var(--border)',
     flexShrink: 0,
+    overflow: 'hidden',
   },
   tabList: {
+    display: 'flex',
     flex: 1,
-    overflowY: 'auto',
-    overflowX: 'hidden',
+    overflow: 'hidden',
   },
   tab: {
     display: 'flex',
     alignItems: 'center',
-    gap: 6,
-    padding: '8px 8px 8px 0',
+    gap: 4,
+    padding: '0 10px',
+    height: 28,
     cursor: 'pointer',
-    borderBottom: '1px solid var(--border)',
+    borderRight: '1px solid var(--border)',
     transition: 'background 0.1s',
+    position: 'relative' as const,
     userSelect: 'none' as const,
+    flexShrink: 0,
+    maxWidth: 160,
   },
   tabActive: {
     background: 'rgba(0, 255, 65, 0.05)',
   },
-  tabIndicator: {
-    width: 3,
-    height: 20,
-    flexShrink: 0,
-  },
-  activeIndicator: {
-    width: 3,
-    height: 20,
+  activeTopLine: {
+    position: 'absolute' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 2,
     background: 'var(--green)',
-    borderRadius: '0 2px 2px 0',
-    boxShadow: '0 0 6px var(--green-glow)',
-  },
-  tabContent: {
-    flex: 1,
-    minWidth: 0,
-    overflow: 'hidden',
+    boxShadow: '0 0 4px var(--green-glow)',
   },
   tabLabel: {
     fontFamily: 'var(--font-mono)',
-    fontSize: 12,
+    fontSize: 11,
     whiteSpace: 'nowrap' as const,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    display: 'block',
     letterSpacing: 0.3,
   },
   renameInput: {
@@ -179,35 +160,33 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid var(--green)',
     color: 'var(--green)',
     fontFamily: 'var(--font-mono)',
-    fontSize: 12,
+    fontSize: 11,
     outline: 'none',
     padding: '0 2px',
-    width: '100%',
-    boxSizing: 'border-box' as const,
+    width: 80,
   },
   closeBtn: {
     background: 'transparent',
     border: 'none',
     color: 'var(--text-secondary)',
     cursor: 'pointer',
-    fontSize: 14,
+    fontSize: 13,
     lineHeight: 1,
     padding: '0 2px',
     flexShrink: 0,
     transition: 'color 0.1s',
-    opacity: 0.6,
+    opacity: 0.5,
   },
   addBtn: {
     background: 'transparent',
-    border: '1px solid var(--border)',
-    borderLeft: 'none',
-    borderRight: 'none',
+    border: 'none',
     color: 'var(--text-secondary)',
     cursor: 'pointer',
     fontFamily: 'var(--font-mono)',
     fontSize: 16,
-    padding: '4px 0',
-    transition: 'all 0.1s',
+    padding: '0 8px',
+    height: 28,
     flexShrink: 0,
+    transition: 'color 0.1s',
   },
 };
