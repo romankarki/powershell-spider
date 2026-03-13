@@ -68,6 +68,7 @@ npm run package
 | Ctrl+Shift+T | New workspace |
 | Ctrl+Shift+F | Search terminal |
 | Ctrl+` | Quick terminal |
+| Ctrl+, | Settings |
 | Ctrl+Shift+A | Toggle agent panel |
 | Ctrl+Shift+P | Command palette |
 
