@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { v4 as uuid } from 'uuid';
-import { Workspace, TreeNode, SplitDirection, TerminalInfo } from '../types';
+import { Workspace, TreeNode, SplitDirection, TerminalInfo, PaneGroup } from '../types';
 import { createLeaf, splitNode, removeNode, findAllTerminalIds, findNextTerminalId } from './split-tree';
 import { destroyTerminal } from '../hooks/useTerminal';
 
@@ -8,6 +8,7 @@ interface TerminalStore {
   workspaces: Workspace[];
   activeWorkspaceIndex: number;
   terminals: Map<string, TerminalInfo>;
+  paneGroups: Map<string, PaneGroup>;
   agentPanelOpen: boolean;
   commandPaletteOpen: boolean;
   searchOpenTerminalId: string | null;
@@ -30,6 +31,12 @@ interface TerminalStore {
   closeTerminal: (id: string) => void;
   renameTerminal: (id: string, label: string) => void;
   updateTree: (tree: TreeNode) => void;
+
+  // Pane group actions
+  addTabToPane: (paneId: string) => Promise<void>;
+  switchTab: (paneId: string, tabId: string) => void;
+  closeTab: (paneId: string, tabId: string) => void;
+  getPaneGroup: (paneId: string) => PaneGroup;
 
   // UI actions
   toggleAgentPanel: () => void;
@@ -58,6 +65,7 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
     workspaces: [initialWorkspace],
     activeWorkspaceIndex: 0,
     terminals: new Map([[initialTermId, { id: initialTermId, label: 'PS 1' }]]),
+    paneGroups: new Map([[initialTermId, { tabIds: [initialTermId], activeTabId: initialTermId }]]),
     agentPanelOpen: false,
     commandPaletteOpen: false,
     searchOpenTerminalId: null,
@@ -78,26 +86,39 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
       const termId = (ws.tree as { id: string }).id;
       const terminals = new Map(state.terminals);
       terminals.set(termId, { id: termId, label: `PS ${terminals.size + 1}` });
+      const paneGroups = new Map(state.paneGroups);
+      paneGroups.set(termId, { tabIds: [termId], activeTabId: termId });
       return {
         workspaces: [...state.workspaces, ws],
         activeWorkspaceIndex: state.workspaces.length,
         terminals,
+        paneGroups,
       };
     }),
 
     removeWorkspace: (index) => set((state) => {
       if (state.workspaces.length <= 1) return state;
       const ws = state.workspaces[index];
-      const termIds = findAllTerminalIds(ws.tree);
+      const leafIds = findAllTerminalIds(ws.tree);
       const terminals = new Map(state.terminals);
-      // Destroy all terminals in the removed workspace
-      termIds.forEach((id) => {
-        destroyTerminal(id);
-        terminals.delete(id);
+      const paneGroups = new Map(state.paneGroups);
+      // Destroy all terminals in all pane groups of the removed workspace
+      leafIds.forEach((paneId) => {
+        const group = paneGroups.get(paneId);
+        if (group) {
+          group.tabIds.forEach((tabId) => {
+            destroyTerminal(tabId);
+            terminals.delete(tabId);
+          });
+          paneGroups.delete(paneId);
+        } else {
+          destroyTerminal(paneId);
+          terminals.delete(paneId);
+        }
       });
       const workspaces = state.workspaces.filter((_, i) => i !== index);
       const activeWorkspaceIndex = Math.min(state.activeWorkspaceIndex, workspaces.length - 1);
-      return { workspaces, activeWorkspaceIndex, terminals };
+      return { workspaces, activeWorkspaceIndex, terminals, paneGroups };
     }),
 
     setActiveWorkspace: (index) => set({ activeWorkspaceIndex: index }),
@@ -117,10 +138,12 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
 
     splitTerminal: async (direction) => {
       // Fetch cwd from the active terminal's PTY before splitting
-      const activeId = get().getActiveTerminalId();
+      const activePaneId = get().getActiveTerminalId();
+      const group = get().paneGroups.get(activePaneId);
+      const activeTabId = group?.activeTabId ?? activePaneId;
       let cwd: string | undefined;
       try {
-        cwd = await window.electronAPI.getCwd(activeId);
+        cwd = await window.electronAPI.getCwd(activeTabId);
       } catch { /* use default */ }
 
       set((state) => {
@@ -129,13 +152,15 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
         const newTree = splitNode(ws.tree, ws.activeTerminalId, newId, direction);
         const terminals = new Map(state.terminals);
         terminals.set(newId, { id: newId, label: `PS ${terminals.size + 1}`, cwd });
+        const paneGroups = new Map(state.paneGroups);
+        paneGroups.set(newId, { tabIds: [newId], activeTabId: newId });
         const workspaces = [...state.workspaces];
         workspaces[state.activeWorkspaceIndex] = {
           ...ws,
           tree: newTree,
           activeTerminalId: newId,
         };
-        return { workspaces, terminals };
+        return { workspaces, terminals, paneGroups };
       });
     },
 
@@ -144,11 +169,20 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
       const result = removeNode(ws.tree, id);
       if (!result) return state; // Don't close the last terminal
 
-      // Destroy the PTY and xterm instance
-      destroyTerminal(id);
-
+      // Destroy all terminals in this pane's group
       const terminals = new Map(state.terminals);
-      terminals.delete(id);
+      const paneGroups = new Map(state.paneGroups);
+      const group = paneGroups.get(id);
+      if (group) {
+        group.tabIds.forEach((tabId) => {
+          destroyTerminal(tabId);
+          terminals.delete(tabId);
+        });
+        paneGroups.delete(id);
+      } else {
+        destroyTerminal(id);
+        terminals.delete(id);
+      }
 
       const nextActive = ws.activeTerminalId === id
         ? findNextTerminalId(result, id) || findAllTerminalIds(result)[0]
@@ -160,7 +194,7 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
         tree: result,
         activeTerminalId: nextActive,
       };
-      return { workspaces, terminals };
+      return { workspaces, terminals, paneGroups };
     }),
 
     renameTerminal: (id, label) => set((state) => {
@@ -177,6 +211,73 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
         tree,
       };
       return { workspaces };
+    }),
+
+    getPaneGroup: (paneId: string) => {
+      const group = get().paneGroups.get(paneId);
+      return group ?? { tabIds: [paneId], activeTabId: paneId };
+    },
+
+    addTabToPane: async (paneId: string) => {
+      // Get cwd from the currently active tab in this pane
+      const group = get().paneGroups.get(paneId);
+      const activeTabId = group?.activeTabId ?? paneId;
+      let cwd: string | undefined;
+      try {
+        cwd = await window.electronAPI.getCwd(activeTabId);
+      } catch { /* use default */ }
+
+      set((state) => {
+        const newId = uuid();
+        const terminals = new Map(state.terminals);
+        terminals.set(newId, { id: newId, label: `PS ${terminals.size + 1}`, cwd });
+
+        const paneGroups = new Map(state.paneGroups);
+        const existing = paneGroups.get(paneId) ?? { tabIds: [paneId], activeTabId: paneId };
+        paneGroups.set(paneId, {
+          tabIds: [...existing.tabIds, newId],
+          activeTabId: newId,
+        });
+
+        return { terminals, paneGroups };
+      });
+    },
+
+    switchTab: (paneId: string, tabId: string) => set((state) => {
+      const paneGroups = new Map(state.paneGroups);
+      const group = paneGroups.get(paneId);
+      if (!group || !group.tabIds.includes(tabId)) return state;
+      paneGroups.set(paneId, { ...group, activeTabId: tabId });
+      return { paneGroups };
+    }),
+
+    closeTab: (paneId: string, tabId: string) => set((state) => {
+      const paneGroups = new Map(state.paneGroups);
+      const group = paneGroups.get(paneId);
+      if (!group) return state;
+
+      // If it's the last tab, close the entire pane instead
+      if (group.tabIds.length <= 1) {
+        // Delegate to closeTerminal which handles tree removal
+        // We can't call closeTerminal from within set, so just return state
+        // and let the caller handle it
+        return state;
+      }
+
+      // Remove the tab
+      const newTabIds = group.tabIds.filter((id) => id !== tabId);
+      const newActive = group.activeTabId === tabId
+        ? newTabIds[Math.min(group.tabIds.indexOf(tabId), newTabIds.length - 1)]
+        : group.activeTabId;
+
+      paneGroups.set(paneId, { tabIds: newTabIds, activeTabId: newActive });
+
+      // Destroy the terminal
+      destroyTerminal(tabId);
+      const terminals = new Map(state.terminals);
+      terminals.delete(tabId);
+
+      return { terminals, paneGroups };
     }),
 
     toggleAgentPanel: () => set((state) => ({ agentPanelOpen: !state.agentPanelOpen })),

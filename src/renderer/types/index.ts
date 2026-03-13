@@ -21,9 +21,14 @@ export interface TerminalInfo {
   cwd?: string; // starting directory for this terminal
 }
 
+export interface PaneGroup {
+  tabIds: string[];      // terminal IDs stacked in this pane
+  activeTabId: string;   // currently visible terminal
+}
+
 export interface Workspace {
   id: string;
   name: string;
   tree: TreeNode;
-  activeTerminalId: string;
+  activeTerminalId: string; // the focused pane's leaf ID
 }
