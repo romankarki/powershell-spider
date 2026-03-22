@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Terminal, ITheme } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { SearchAddon, ISearchOptions } from '@xterm/addon-search';
+import { Unicode11Addon } from '@xterm/addon-unicode11';
 import { THEMES, DEFAULT_THEME, ThemeId } from '../themes';
 import '@xterm/xterm/css/xterm.css';
 
@@ -119,8 +120,11 @@ export function useTerminal(
 
       const fitAddon = new FitAddon();
       const searchAddon = new SearchAddon();
+      const unicodeAddon = new Unicode11Addon();
       term.loadAddon(fitAddon);
       term.loadAddon(searchAddon);
+      term.loadAddon(unicodeAddon);
+      term.unicode.activeVersion = '11';
       term.open(wrapper);
 
       termRef.current = term;

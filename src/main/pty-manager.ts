@@ -24,13 +24,21 @@ export function createPty(
 ): void {
   const shell = 'powershell.exe';
   const startCwd = cwd || process.env.USERPROFILE || process.cwd();
-  const ptyProcess = getPty()!.spawn(shell, [], {
+  const env = { ...process.env } as Record<string, string>;
+  // Force UTF-8 output so Unicode/emoji render correctly
+  env['PYTHONIOENCODING'] = 'utf-8';
+  env['LANG'] = 'en_US.UTF-8';
+
+  const ptyProcess = getPty()!.spawn(shell, ['-NoLogo'], {
     name: 'xterm-256color',
     cols: 80,
     rows: 24,
     cwd: startCwd,
-    env: process.env as Record<string, string>,
+    env,
   });
+
+  // Set UTF-8 encoding on the PowerShell session so emojis/unicode render correctly
+  ptyProcess.write('chcp 65001 | Out-Null; $OutputEncoding = [System.Text.Encoding]::UTF8; [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; cls\r');
 
   ptyProcess.onData(onData);
   ptyProcess.onExit(onExit);
