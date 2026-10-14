@@ -166,3 +166,15 @@ export function findTerminalInDirection(
 
   return bestId;
 }
+
+/** Set the ratio of the split node at `path` ('f' = first child, 's' = second child). */
+export function updateRatioAtPath(tree: TreeNode, path: string, newRatio: number): TreeNode {
+  if (tree.type === 'terminal') return tree;
+  if (path === '') {
+    return { ...tree, ratio: Math.max(0.1, Math.min(0.9, newRatio)) };
+  }
+  const [step, rest] = [path[0], path.slice(1)];
+  return step === 'f'
+    ? { ...tree, first: updateRatioAtPath(tree.first, rest, newRatio) }
+    : { ...tree, second: updateRatioAtPath(tree.second, rest, newRatio) };
+}

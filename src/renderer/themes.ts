@@ -255,3 +255,26 @@ export const THEMES: Record<string, SpiderTheme> = {
 
 export type ThemeId = keyof typeof THEMES;
 export const DEFAULT_THEME: ThemeId = 'spider';
+
+function hexToRgb(hex: string): string {
+  const m = hex.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  if (!m) return '0, 255, 65';
+  return `${parseInt(m[1], 16)}, ${parseInt(m[2], 16)}, ${parseInt(m[3], 16)}`;
+}
+
+/** Update the UI's CSS variables to match a theme. */
+export function applyUiTheme(themeId: ThemeId): void {
+  const theme = THEMES[themeId] ?? THEMES[DEFAULT_THEME];
+  const root = document.documentElement.style;
+  root.setProperty('--bg-primary', theme.ui.bgPrimary);
+  root.setProperty('--bg-secondary', theme.ui.bgSecondary);
+  root.setProperty('--bg-tertiary', theme.ui.bgTertiary);
+  root.setProperty('--green', theme.ui.accent);
+  root.setProperty('--green-dim', theme.ui.accentDim);
+  root.setProperty('--green-glow', theme.ui.accentGlow);
+  root.setProperty('--accent-rgb', hexToRgb(theme.ui.accent));
+  root.setProperty('--border', theme.ui.border);
+  root.setProperty('--border-active', theme.ui.borderActive);
+  root.setProperty('--text-primary', theme.ui.textPrimary);
+  root.setProperty('--text-secondary', theme.ui.textSecondary);
+}

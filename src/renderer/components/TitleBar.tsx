@@ -1,108 +1,140 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useTerminalStore } from '../state/terminal-store';
+import { useSettingsStore } from '../state/settings-store';
+import { IconMinimize, IconMaximize, IconRestore, IconClose, IconSearch, IconSidebar } from './Icons';
+
+const drag = { WebkitAppRegion: 'drag' } as React.CSSProperties;
+const noDrag = { WebkitAppRegion: 'no-drag' } as React.CSSProperties;
 
 export const TitleBar: React.FC = () => {
-  const [time, setTime] = useState(new Date());
+  const [maximized, setMaximized] = useState(false);
+  const workspaceName = useTerminalStore((s) => s.getActiveWorkspace().name);
+  const togglePalette = useTerminalStore((s) => s.toggleCommandPalette);
+  const sidebarCollapsed = useSettingsStore((s) => s.sidebarCollapsed);
+  const updateSettings = useSettingsStore((s) => s.update);
 
   useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
+    window.electronAPI.isMaximized().then(setMaximized);
+    return window.electronAPI.onWindowState((s) => setMaximized(s.maximized));
   }, []);
 
-  const timeStr = time.toLocaleTimeString('en-US', { hour12: false });
-
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: '34px',
-        background: 'linear-gradient(90deg, var(--bg-secondary), var(--bg-primary), var(--bg-secondary))',
-        borderBottom: '1px solid var(--border)',
-        // @ts-expect-error Electron-specific CSS property
-        WebkitAppRegion: 'drag',
-        userSelect: 'none',
-        padding: '0 12px',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <span style={{
-          color: 'var(--green)',
-          fontWeight: 700,
-          fontSize: '13px',
-          letterSpacing: '2px',
-          textShadow: '0 0 10px var(--green-glow), 0 0 20px rgba(0, 255, 65, 0.15)',
-        }}>
-          /\../\
-        </span>
-        <span style={{
-          color: 'var(--green)',
-          fontWeight: 700,
-          fontSize: '13px',
-          letterSpacing: '2px',
-          textShadow: '0 0 10px var(--green-glow)',
-        }}>
-          SPIDER
-        </span>
-        <span style={{
-          color: 'var(--text-secondary)',
-          fontSize: '10px',
-          letterSpacing: '1px',
-          opacity: 0.6,
-        }}>
-          PS TERMINAL MANAGER
-        </span>
+    <div className="titlebar" style={drag}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
+        <button
+          className={`icon-btn ${sidebarCollapsed ? '' : 'active'}`}
+          style={{ ...noDrag, width: 28, height: 24, marginLeft: 4 }}
+          onClick={() => updateSettings({ sidebarCollapsed: !sidebarCollapsed })}
+          title="Toggle sidebar (Ctrl+Shift+E)"
+        >
+          <IconSidebar size={15} />
+        </button>
+        <span className="titlebar-logo">/\../\</span>
+        <span className="titlebar-name">SPIDER</span>
+        <span className="titlebar-ws">{workspaceName}</span>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <span style={{
-          color: 'var(--green-dim)',
-          fontSize: '10px',
-          fontFamily: 'var(--font-mono)',
-          letterSpacing: '1px',
-          opacity: 0.7,
-        }}>
-          {timeStr}
-        </span>
+      <button
+        className="titlebar-search"
+        style={noDrag}
+        onClick={togglePalette}
+        title="Command palette"
+      >
+        <IconSearch size={12} />
+        <span style={{ flex: 1, textAlign: 'left' }}>Search commands…</span>
+        <span className="kbd"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>P</kbd></span>
+      </button>
 
-        {/* @ts-expect-error Electron-specific CSS property */}
-        <div style={{ display: 'flex', gap: '2px', WebkitAppRegion: 'no-drag' }}>
-          <button onClick={() => window.electronAPI.minimize()} className="title-btn">
-            <span style={{ fontSize: '16px', lineHeight: 1 }}>&#x2500;</span>
-          </button>
-          <button onClick={() => window.electronAPI.maximize()} className="title-btn">
-            <span style={{ fontSize: '11px' }}>&#x25A1;</span>
-          </button>
-          <button onClick={() => window.electronAPI.close()} className="title-btn title-btn-close">
-            <span style={{ fontSize: '12px' }}>&#x2715;</span>
-          </button>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1, height: '100%' }}>
+        <div style={{ display: 'flex', height: '100%', ...noDrag }}>
+        <button className="win-btn" onClick={() => window.electronAPI.minimize()} title="Minimize">
+          <IconMinimize size={14} />
+        </button>
+        <button className="win-btn" onClick={() => window.electronAPI.maximize()} title={maximized ? 'Restore' : 'Maximize'}>
+          {maximized ? <IconRestore size={13} /> : <IconMaximize size={12} />}
+        </button>
+        <button className="win-btn win-close" onClick={() => window.electronAPI.close()} title="Close">
+          <IconClose size={14} />
+        </button>
         </div>
       </div>
 
       <style>{`
-        .title-btn {
-          width: 38px;
-          height: 26px;
+        .titlebar {
+          display: flex;
+          align-items: center;
+          height: 36px;
+          flex-shrink: 0;
+          background: var(--bg-secondary);
+          border-bottom: 1px solid var(--border);
+          user-select: none;
+        }
+        .titlebar-logo {
+          color: var(--green);
+          font-weight: 700;
+          font-size: 13px;
+          letter-spacing: 1px;
+          text-shadow: 0 0 10px var(--green-glow);
+        }
+        .titlebar-name {
+          color: var(--green);
+          font-weight: 700;
+          font-size: 12px;
+          letter-spacing: 3px;
+          text-shadow: 0 0 10px var(--green-glow);
+        }
+        .titlebar-ws {
+          color: var(--text-secondary);
+          font-size: 11px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          padding-left: 10px;
+          border-left: 1px solid var(--border);
+        }
+        .titlebar-search {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: min(420px, 40vw);
+          height: 24px;
+          padding: 0 6px 0 10px;
+          border-radius: 5px;
+          border: 1px solid var(--border);
+          background: var(--bg-primary);
+          color: var(--text-secondary);
+          font-size: 11px;
+          cursor: pointer;
+          transition: border-color 0.12s, color 0.12s;
+        }
+        .titlebar-search:hover {
+          border-color: var(--green-dim);
+          color: var(--text-primary);
+        }
+        .titlebar-search .kbd kbd {
+          padding: 0 4px;
+          font-size: 9px;
+          line-height: 13px;
+        }
+        .win-btn {
+          width: 46px;
+          height: 100%;
           border: none;
           background: transparent;
           color: var(--text-secondary);
-          font-size: 12px;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 2px;
-          font-family: var(--font-mono);
-          transition: all 0.15s ease;
+          transition: background 0.12s, color 0.12s;
         }
-        .title-btn:hover {
+        .win-btn:hover {
           background: var(--bg-tertiary);
           color: var(--text-primary);
         }
-        .title-btn-close:hover {
-          background: var(--red);
-          color: white;
-          box-shadow: 0 0 8px rgba(255, 0, 64, 0.4);
+        .win-close:hover {
+          background: #e81123;
+          color: #fff;
         }
       `}</style>
     </div>

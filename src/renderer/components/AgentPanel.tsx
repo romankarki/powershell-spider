@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTerminalStore } from '../state/terminal-store';
 import { findAllTerminalIds } from '../state/split-tree';
+import { terminalDisplayName } from '../types';
 
 export const AgentPanel: React.FC = () => {
   const workspace = useTerminalStore((s) => s.getActiveWorkspace());
@@ -113,7 +114,7 @@ export const AgentPanel: React.FC = () => {
         </div>
         {allIds.map((id) => {
           const info = terminals.get(id);
-          const label = info?.label || id.slice(0, 8);
+          const label = terminalDisplayName(info);
           const isSelected = selectedIds.has(id);
           return (
             <div

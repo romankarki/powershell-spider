@@ -59,7 +59,8 @@ async function startDev() {
   console.log('Preload built');
 
   // 4. Start electron
-  const electronProcess = spawn(electronPath, ['.'], {
+  // Extra CLI args are forwarded to Electron (e.g. --remote-debugging-port=9222)
+  const electronProcess = spawn(electronPath, ['.', ...process.argv.slice(2)], {
     cwd: __dirname,
     stdio: 'inherit',
     env: { ...process.env },

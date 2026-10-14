@@ -17,8 +17,10 @@ export type TreeNode = TerminalLeaf | SplitNode;
 
 export interface TerminalInfo {
   id: string;
-  label: string;
-  cwd?: string; // starting directory for this terminal
+  label: string;      // default ("PS 3") or user-chosen name
+  renamed?: boolean;  // true when the user picked the label; otherwise the shell title is shown
+  title?: string;     // latest title reported by the shell (folder name, running app, ...)
+  cwd?: string;       // starting directory, then kept in sync with the shell
 }
 
 export interface PaneGroup {
@@ -31,4 +33,31 @@ export interface Workspace {
   name: string;
   tree: TreeNode;
   activeTerminalId: string; // the focused pane's leaf ID
+  zoomedPaneId?: string | null; // pane temporarily filling the whole workspace
+}
+
+export interface Toast {
+  id: number;
+  message: string;
+}
+
+export interface DialogRequest {
+  title: string;
+  message: string;
+  detail?: string;
+  confirmLabel: string;
+  resolve: (ok: boolean) => void;
+}
+
+export interface ContextMenuRequest {
+  x: number;
+  y: number;
+  terminalId: string;
+}
+
+/** Name to show for a terminal: user's name if renamed, else the shell-reported title. */
+export function terminalDisplayName(info: TerminalInfo | undefined): string {
+  if (!info) return '---';
+  if (info.renamed) return info.label;
+  return info.title?.trim() || info.label;
 }

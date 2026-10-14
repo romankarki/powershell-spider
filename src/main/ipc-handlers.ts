@@ -1,20 +1,20 @@
-import { ipcMain, BrowserWindow } from 'electron';
-import { createPty, writePty, resizePty, killPty, killAll, getCwd } from './pty-manager';
+import { ipcMain, BrowserWindow, clipboard, shell, app } from 'electron';
+import { createPty, writePty, resizePty, killPty, killAll, getCwd, getAvailableShells, CreatePtyOptions } from './pty-manager';
 
 export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void {
-  function safeSend(channel: string, data?: string) {
+  function safeSend(channel: string, ...args: unknown[]) {
     const win = getWindow();
     if (win && !win.isDestroyed()) {
-      win.webContents.send(channel, data);
+      win.webContents.send(channel, ...args);
     }
   }
 
-  ipcMain.handle('terminal:create', (_event, id: string, cwd?: string) => {
+  ipcMain.handle('terminal:create', (_event, id: string, options?: CreatePtyOptions) => {
     createPty(
       id,
       (data) => safeSend(`terminal:data:${id}`, data),
-      () => safeSend(`terminal:exit:${id}`),
-      cwd
+      (exitCode) => safeSend(`terminal:exit:${id}`, exitCode),
+      options
     );
   });
 
@@ -40,6 +40,23 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
     }
   });
 
+  // Clipboard (main-process clipboard is reliable regardless of focus/permissions)
+  ipcMain.handle('clipboard:read-text', () => clipboard.readText());
+  ipcMain.handle('clipboard:write-text', (_event, text: string) => {
+    clipboard.writeText(text);
+  });
+
+  ipcMain.handle('shell:open-external', (_event, url: string) => {
+    if (/^https?:\/\//i.test(url)) {
+      return shell.openExternal(url);
+    }
+  });
+
+  ipcMain.handle('app:info', () => ({
+    version: app.getVersion(),
+    shells: getAvailableShells(),
+  }));
+
   // Window controls
   ipcMain.handle('window:minimize', () => {
     getWindow()?.minimize();
@@ -53,6 +70,13 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
       win?.maximize();
     }
   });
+
+  ipcMain.handle('window:toggle-fullscreen', () => {
+    const win = getWindow();
+    win?.setFullScreen(!win.isFullScreen());
+  });
+
+  ipcMain.handle('window:is-maximized', () => getWindow()?.isMaximized() ?? false);
 
   ipcMain.handle('window:close', () => {
     killAll();

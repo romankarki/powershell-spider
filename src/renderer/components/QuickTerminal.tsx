@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useTerminal } from '../hooks/useTerminal';
 import { useTerminalStore } from '../state/terminal-store';
+import { IconChevronUp } from './Icons';
 
 export const QuickTerminal: React.FC = () => {
   const isOpen = useTerminalStore((s) => s.quickTerminalOpen);
@@ -24,6 +25,7 @@ export const QuickTerminal: React.FC = () => {
       const timer = setTimeout(() => setClosing(false), 200);
       return () => clearTimeout(timer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const handleBackdropClick = () => {
@@ -41,7 +43,7 @@ export const QuickTerminal: React.FC = () => {
         style={{
           position: 'fixed',
           inset: 0,
-          zIndex: 50,
+          zIndex: 900,
           background: visible ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0)',
           transition: 'background 0.2s ease',
         }}
@@ -54,13 +56,13 @@ export const QuickTerminal: React.FC = () => {
           left: 0,
           right: 0,
           height: '45vh',
-          zIndex: 51,
+          zIndex: 901,
           display: 'flex',
           flexDirection: 'column',
           transform: visible ? 'translateY(0)' : 'translateY(-100%)',
           transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
           borderBottom: '2px solid var(--green-dim)',
-          boxShadow: '0 4px 24px rgba(0, 255, 65, 0.15), 0 0 1px var(--green)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 4px 24px rgba(var(--accent-rgb), 0.12)',
         }}
       >
         {/* Header bar */}
@@ -117,7 +119,7 @@ export const QuickTerminal: React.FC = () => {
               e.currentTarget.style.color = 'var(--text-secondary)';
             }}
           >
-            &#x25B2;
+            <IconChevronUp size={14} />
           </button>
         </div>
         {/* Terminal body */}
@@ -146,6 +148,6 @@ const QuickTerminalMount: React.FC<{
   isOpen: boolean;
 }> = ({ id, containerRef, isOpen }) => {
   // We always mount the terminal, but only focus when open
-  useTerminal(id, containerRef, isOpen, () => {});
+  useTerminal(id, containerRef, isOpen);
   return null;
 };

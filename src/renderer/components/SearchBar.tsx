@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { searchNext, searchPrevious, clearSearch, onSearchResults, SearchResult } from '../hooks/useTerminal';
+import { searchNext, searchPrevious, clearSearch, onSearchResults, SearchResult, focusTerminal } from '../terminal/registry';
+import { IconChevronUp, IconChevronDown, IconClose, IconSearch } from './Icons';
 
 interface SearchBarProps {
   terminalId: string;
@@ -41,6 +42,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ terminalId, onClose }) => 
   const handleClose = useCallback(() => {
     clearSearch(terminalId);
     onClose();
+    focusTerminal(terminalId);
   }, [terminalId, onClose]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -63,8 +65,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({ terminalId, onClose }) => 
     : '';
 
   return (
-    <div style={styles.container} onKeyDown={handleKeyDown}>
-      <div style={styles.searchIcon}>&#x2315;</div>
+    <div style={styles.container} onKeyDown={handleKeyDown} onMouseDown={(e) => e.stopPropagation()}>
+      <IconSearch size={13} style={styles.searchIcon} />
       <input
         ref={inputRef}
         type="text"
@@ -106,29 +108,17 @@ export const SearchBar: React.FC<SearchBarProps> = ({ terminalId, onClose }) => 
         title="Previous (Shift+Enter)"
         onClick={() => searchPrevious(terminalId, query, opts)}
       >
-        &#x25B2;
+        <IconChevronUp size={13} />
       </NavButton>
       <NavButton
         title="Next (Enter)"
         onClick={() => searchNext(terminalId, query, opts)}
       >
-        &#x25BC;
+        <IconChevronDown size={13} />
       </NavButton>
       <div style={styles.divider} />
-      <button
-        onClick={handleClose}
-        title="Close (Esc)"
-        style={styles.closeButton}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.color = 'var(--red)';
-          e.currentTarget.style.textShadow = '0 0 6px var(--red)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.color = 'var(--text-secondary)';
-          e.currentTarget.style.textShadow = 'none';
-        }}
-      >
-        &#x2715;
+      <button onClick={handleClose} title="Close (Esc)" className="icon-btn danger" style={{ width: 22, height: 22 }}>
+        <IconClose size={12} />
       </button>
     </div>
   );
@@ -146,7 +136,7 @@ const ToggleButton: React.FC<{
     style={{
       ...styles.toggleButton,
       color: active ? 'var(--green)' : 'var(--text-secondary)',
-      background: active ? 'rgba(0, 255, 65, 0.1)' : 'transparent',
+      background: active ? 'var(--accent-soft)' : 'transparent',
       borderColor: active ? 'var(--green-dim)' : 'transparent',
       textShadow: active ? '0 0 6px var(--green-glow)' : 'none',
     }}
@@ -178,25 +168,25 @@ const NavButton: React.FC<{
 const styles: Record<string, React.CSSProperties> = {
   container: {
     position: 'absolute',
-    top: 24, // below terminal header
-    right: 8,
+    top: 8,
+    right: 16,
     zIndex: 10,
     display: 'flex',
     alignItems: 'center',
     gap: 4,
-    background: 'rgba(10, 10, 10, 0.95)',
+    background: 'var(--bg-secondary)',
     border: '1px solid var(--green-dim)',
-    borderRadius: 4,
-    padding: '4px 8px',
-    boxShadow: '0 0 12px rgba(0, 255, 65, 0.15), inset 0 0 8px rgba(0, 255, 65, 0.03)',
+    borderRadius: 6,
+    padding: '5px 6px 5px 10px',
+    boxShadow: 'var(--shadow-pop), 0 0 12px rgba(var(--accent-rgb), 0.12)',
     animation: 'slide-in-down 0.1s ease-out',
     fontFamily: 'var(--font-mono)',
     fontSize: 12,
   },
   searchIcon: {
     color: 'var(--green-dim)',
-    fontSize: 14,
-    marginRight: 2,
+    marginRight: 4,
+    flexShrink: 0,
   },
   input: {
     background: 'transparent',
@@ -234,6 +224,8 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'all 0.1s',
   },
   navButton: {
+    display: 'flex',
+    alignItems: 'center',
     background: 'transparent',
     border: 'none',
     color: 'var(--text-secondary)',
@@ -242,15 +234,5 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '2px 4px',
     lineHeight: 1,
     transition: 'color 0.1s',
-  },
-  closeButton: {
-    background: 'transparent',
-    border: 'none',
-    color: 'var(--text-secondary)',
-    cursor: 'pointer',
-    fontSize: 13,
-    padding: '2px 4px',
-    lineHeight: 1,
-    transition: 'all 0.1s',
   },
 };

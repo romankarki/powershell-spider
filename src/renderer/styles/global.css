@@ -1,5 +1,3 @@
-/* Font loaded async in index.html to avoid render-blocking */
-
 * {
   margin: 0;
   padding: 0;
@@ -13,6 +11,9 @@
   --green: #00ff41;
   --green-dim: #00cc33;
   --green-glow: rgba(0, 255, 65, 0.3);
+  --accent-rgb: 0, 255, 65;
+  --accent-soft: rgba(var(--accent-rgb), 0.08);
+  --accent-softer: rgba(var(--accent-rgb), 0.04);
   --cyan: #00e5ff;
   --cyan-dim: #00b8d4;
   --cyan-glow: rgba(0, 229, 255, 0.3);
@@ -23,7 +24,10 @@
   --text-secondary: #888888;
   --border: #2a2a2a;
   --border-active: #00ff41;
-  --font-mono: 'JetBrainsMono Nerd Font', 'CaskaydiaCove Nerd Font', 'Hack Nerd Font', 'FiraCode Nerd Font', 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
+  --font-mono: 'JetBrainsMono Nerd Font', 'CaskaydiaCove Nerd Font', 'MesloLGLDZ Nerd Font Mono', 'Cascadia Mono', 'Cascadia Code', 'Consolas', monospace;
+  --font-ui: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  --radius: 6px;
+  --shadow-pop: 0 12px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 html, body, #root {
@@ -34,77 +38,230 @@ html, body, #root {
   color: var(--text-primary);
   font-family: var(--font-mono);
   font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+}
+
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 1px solid var(--green-dim);
+  outline-offset: 1px;
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 3px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
+  background-clip: padding-box;
 }
 
 /* Selection */
 ::selection {
   background: var(--green-glow);
-  color: var(--green);
+  color: var(--text-primary);
 }
 
-/* Scanline overlay */
-#root::after {
+/* CRT effects (scanlines + vignette), toggleable in settings */
+#root.crt::after {
   content: '';
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: repeating-linear-gradient(
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 0, 0, 0.03) 2px,
-    rgba(0, 0, 0, 0.03) 4px
+    rgba(0, 0, 0, 0.035) 2px,
+    rgba(0, 0, 0, 0.035) 4px
   );
   pointer-events: none;
   z-index: 9999;
 }
 
-/* Fast animations only */
+#root.crt::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 70%, rgba(0, 0, 0, 0.25) 100%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* Animations */
 @keyframes pulse-glow {
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
 }
 
 @keyframes slide-in-right {
-  from { transform: translateX(30px); opacity: 0; }
+  from { transform: translateX(24px); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
 
 @keyframes slide-in-down {
-  from { transform: translateY(-8px); opacity: 0; }
+  from { transform: translateY(-6px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* Subtle vignette */
-#root::before {
-  content: '';
+@keyframes slide-in-up {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Shared overlay + popover primitives */
+.overlay {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  animation: fade-in 0.1s ease-out;
+}
+
+.panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+}
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.kbd kbd {
+  font-family: inherit;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 1px 5px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 14px;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color 0.12s, background 0.12s;
+}
+
+.icon-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.icon-btn.danger:hover {
+  color: var(--red);
+}
+
+.icon-btn.active {
+  color: var(--green);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
   width: 100%;
-  height: 100%;
-  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.4) 100%);
-  pointer-events: none;
-  z-index: 9998;
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-item:hover:not(:disabled), .menu-item.selected {
+  background: var(--accent-soft);
+  color: var(--green);
+}
+
+.menu-item:disabled {
+  color: var(--text-secondary);
+  opacity: 0.5;
+  cursor: default;
+}
+
+.menu-sep {
+  height: 1px;
+  margin: 4px 2px;
+  background: var(--border);
+}
+
+.btn {
+  padding: 7px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+}
+
+.btn:hover {
+  border-color: var(--text-secondary);
+}
+
+.btn.primary {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--bg-primary);
+  font-weight: 700;
+}
+
+.btn.primary:hover {
+  box-shadow: 0 0 12px var(--green-glow);
+}
+
+.field {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 5px 8px;
+  outline: none;
+}
+
+.field:focus {
+  border-color: var(--green-dim);
 }

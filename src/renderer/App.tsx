@@ -1,168 +1,120 @@
 import React, { useEffect } from 'react';
 import { TitleBar } from './components/TitleBar';
 import { WorkspaceSidebar } from './components/WorkspaceSidebar';
-import { SplitContainer } from './components/SplitContainer';
+import { WorkspaceView } from './components/SplitContainer';
 import { StatusBar } from './components/StatusBar';
 import { CommandPalette } from './components/CommandPalette';
 import { AgentPanel } from './components/AgentPanel';
 import { QuickTerminal } from './components/QuickTerminal';
 import { SettingsPanel } from './components/SettingsPanel';
+import { ShortcutsHelp } from './components/ShortcutsHelp';
+import { ContextMenu, Toasts, ConfirmDialog } from './components/Popups';
 import { useTerminalStore } from './state/terminal-store';
-import { findTerminalInDirection, NavDirection } from './state/split-tree';
+import { useSettingsStore } from './state/settings-store';
+import { commandForCombo } from './commands';
+import { comboFromEvent } from './keys';
+import { applyUiTheme } from './themes';
+import { pasteText } from './terminal/registry';
+
+const REPEATABLE = new Set(['tab.next', 'tab.prev', 'view.zoomIn', 'view.zoomOut', 'pane.up', 'pane.down', 'pane.left', 'pane.right']);
+
+/** True for text fields other than xterm's hidden input textarea. */
+function isEditableTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  if (target.classList.contains('xterm-helper-textarea')) return false;
+  return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
+}
+
+/** Quote a path for PowerShell if it contains characters that need it. */
+function quotePath(p: string): string {
+  return /[\s'"`$&(){}[\];,]/.test(p) ? `'${p.replace(/'/g, "''")}'` : p;
+}
 
 const App: React.FC = () => {
-  const workspace = useTerminalStore((s) => s.getActiveWorkspace());
   const agentPanelOpen = useTerminalStore((s) => s.agentPanelOpen);
-  const splitTerminal = useTerminalStore((s) => s.splitTerminal);
-  const closeTerminal = useTerminalStore((s) => s.closeTerminal);
-  const getActiveTerminalId = useTerminalStore((s) => s.getActiveTerminalId);
-  const addWorkspace = useTerminalStore((s) => s.addWorkspace);
-  const toggleAgentPanel = useTerminalStore((s) => s.toggleAgentPanel);
-  const toggleCommandPalette = useTerminalStore((s) => s.toggleCommandPalette);
-  const toggleSearch = useTerminalStore((s) => s.toggleSearch);
-  const toggleQuickTerminal = useTerminalStore((s) => s.toggleQuickTerminal);
-  const addTabToPane = useTerminalStore((s) => s.addTabToPane);
-  const switchTab = useTerminalStore((s) => s.switchTab);
-  const toggleSettings = useTerminalStore((s) => s.toggleSettings);
-  const setActiveTerminal = useTerminalStore((s) => s.setActiveTerminal);
-  const closeTab = useTerminalStore((s) => s.closeTab);
+  const theme = useSettingsStore((s) => s.theme);
+  const crtEffects = useSettingsStore((s) => s.crtEffects);
 
   useEffect(() => {
+    applyUiTheme(theme);
+  }, [theme]);
+
+  useEffect(() => {
+    document.getElementById('root')?.classList.toggle('crt', crtEffects);
+  }, [crtEffects]);
+
+  // Global keybindings (capture phase so we act before xterm sees the key)
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+,: open settings
-      if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key === ',') {
-        e.preventDefault();
-        toggleSettings();
-        return;
-      }
-
-      // Ctrl+D: new terminal tab in active pane (Ghostty-style)
-      if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'd') {
-        e.preventDefault();
-        addTabToPane(getActiveTerminalId());
-        return;
-      }
-
-      // Ctrl+W: close active tab (closes pane if last tab)
-      if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'w') {
-        e.preventDefault();
-        const state = useTerminalStore.getState();
-        const paneId = state.getActiveTerminalId();
-        const group = state.getPaneGroup(paneId);
-        if (group.tabIds.length > 1) {
-          closeTab(paneId, group.activeTabId);
-        } else {
-          closeTerminal(paneId);
-        }
-        return;
-      }
-
-      // Alt+1-9: switch workspace by number
-      if (e.altKey && !e.ctrlKey && !e.shiftKey && e.key >= '1' && e.key <= '9') {
-        e.preventDefault();
-        const idx = parseInt(e.key) - 1;
-        const state = useTerminalStore.getState();
-        if (idx < state.workspaces.length) {
-          state.setActiveWorkspace(idx);
-        }
-        return;
-      }
-
-      // Alt+WASD: spatial pane navigation
-      if (e.altKey && !e.ctrlKey && !e.shiftKey) {
-        const wasdMap: Record<string, NavDirection> = {
-          a: 'left',
-          d: 'right',
-          w: 'up',
-          s: 'down',
-        };
-        const navDir = wasdMap[e.key.toLowerCase()];
-        if (navDir) {
-          e.preventDefault();
-          const ws = useTerminalStore.getState().getActiveWorkspace();
-          const target = findTerminalInDirection(ws.tree, ws.activeTerminalId, navDir);
-          if (target) setActiveTerminal(target);
-          return;
-        }
-      }
-
-      // Ctrl+PageUp/PageDown: cycle tabs within active pane
-      if (e.ctrlKey && !e.shiftKey && !e.altKey) {
-        if (e.key === 'PageUp' || e.key === 'PageDown') {
-          e.preventDefault();
-          const state = useTerminalStore.getState();
-          const paneId = state.getActiveTerminalId();
-          const group = state.getPaneGroup(paneId);
-          if (group.tabIds.length > 1) {
-            const currentIdx = group.tabIds.indexOf(group.activeTabId);
-            const delta = e.key === 'PageDown' ? 1 : -1;
-            const nextIdx = (currentIdx + delta + group.tabIds.length) % group.tabIds.length;
-            switchTab(paneId, group.tabIds[nextIdx]);
-          }
-          return;
-        }
-      }
-
-      // Ctrl+`: toggle quick terminal
-      if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key === '`') {
-        e.preventDefault();
-        toggleQuickTerminal();
-        return;
-      }
-
-      if (e.ctrlKey && e.shiftKey) {
-        switch (e.key.toUpperCase()) {
-          case 'H':
-            e.preventDefault();
-            splitTerminal('horizontal');
-            break;
-          case 'B':
-            e.preventDefault();
-            splitTerminal('vertical');
-            break;
-          case 'W':
-            e.preventDefault();
-            closeTerminal(getActiveTerminalId());
-            break;
-          case 'T':
-            e.preventDefault();
-            addWorkspace();
-            break;
-          case 'A':
-            e.preventDefault();
-            toggleAgentPanel();
-            break;
-          case 'P':
-            e.preventDefault();
-            toggleCommandPalette();
-            break;
-          case 'F':
-            e.preventDefault();
-            toggleSearch();
-            break;
-        }
-      }
+      const cmd = commandForCombo(comboFromEvent(e));
+      if (!cmd) return;
+      const state = useTerminalStore.getState();
+      const modalOpen = state.settingsOpen || state.shortcutsOpen || state.commandPaletteOpen;
+      if (state.dialog) return;
+      if (!cmd.global && (isEditableTarget(e.target) || modalOpen)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      // Holding a key shouldn't spawn dozens of splits/tabs
+      if (e.repeat && !REPEATABLE.has(cmd.id)) return;
+      cmd.run();
     };
-
-    // Use capture phase so we intercept before xterm processes the key
     window.addEventListener('keydown', handleKeyDown, true);
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [splitTerminal, closeTerminal, getActiveTerminalId, addWorkspace, toggleAgentPanel, toggleCommandPalette, toggleSearch, toggleQuickTerminal, addTabToPane, switchTab, toggleSettings, setActiveTerminal, closeTab]);
+  }, []);
+
+  // Return focus to the active terminal when overlays close
+  useEffect(() => {
+    return useTerminalStore.subscribe((s, prev) => {
+      const open = (x: typeof s) =>
+        x.commandPaletteOpen || x.settingsOpen || x.shortcutsOpen || x.dialog !== null ||
+        x.contextMenu !== null || x.quickTerminalOpen || x.searchOpenTerminalId !== null;
+      if (open(prev) && !open(s)) {
+        requestAnimationFrame(() => useTerminalStore.getState().focusActiveTerminal());
+      }
+    });
+  }, []);
+
+  // Dropping files onto the window types their (quoted) paths into the focused terminal
+  useEffect(() => {
+    const onDragOver = (e: DragEvent) => {
+      if (e.dataTransfer?.types.includes('Files')) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+      }
+    };
+    const onDrop = (e: DragEvent) => {
+      const files = Array.from(e.dataTransfer?.files ?? []);
+      if (!files.length) return;
+      e.preventDefault();
+      const paths = files.map((f) => window.electronAPI.getPathForFile(f)).filter(Boolean);
+      if (paths.length) pasteText(useTerminalStore.getState().getFocusedTabId(), paths.map(quotePath).join(' ') + ' ');
+    };
+    window.addEventListener('dragover', onDragOver);
+    window.addEventListener('drop', onDrop);
+    return () => {
+      window.removeEventListener('dragover', onDragOver);
+      window.removeEventListener('drop', onDrop);
+    };
+  }, []);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       <TitleBar />
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
         <WorkspaceSidebar />
-        <div style={{ flex: 1, overflow: 'hidden' }}>
-          <SplitContainer node={workspace.tree} />
-        </div>
+        <main style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
+          <WorkspaceView />
+        </main>
         {agentPanelOpen && <AgentPanel />}
       </div>
       <StatusBar />
-      <CommandPalette />
       <QuickTerminal />
+      <CommandPalette />
       <SettingsPanel />
+      <ShortcutsHelp />
+      <ContextMenu />
+      <ConfirmDialog />
+      <Toasts />
     </div>
   );
 };

@@ -1,29 +1,31 @@
 import React, { useRef, useCallback } from 'react';
-import { TreeNode, SplitNode } from '../types';
+import { TreeNode } from '../types';
 import { TerminalPane } from './TerminalPane';
 import { Divider } from './Divider';
 import { useTerminalStore } from '../state/terminal-store';
-import { updateRatio } from '../state/split-tree';
+import { updateRatioAtPath } from '../state/split-tree';
 
 interface SplitContainerProps {
   node: TreeNode;
+  multiPane: boolean;
+  path?: string; // location of this node in the tree ('f'/'s' steps from the root)
 }
 
-export const SplitContainer: React.FC<SplitContainerProps> = ({ node }) => {
+export const SplitContainer: React.FC<SplitContainerProps> = ({ node, multiPane, path = '' }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const tree = useTerminalStore((s) => s.getActiveWorkspace().tree);
   const updateTree = useTerminalStore((s) => s.updateTree);
 
   const handleResize = useCallback(
-    (splitNode: SplitNode) => (ratio: number) => {
-      const newTree = updateRatio(tree, splitNode, ratio);
-      updateTree(newTree);
+    (ratio: number) => {
+      // Address the split by path: node objects are replaced on every update
+      const tree = useTerminalStore.getState().getActiveWorkspace().tree;
+      updateTree(updateRatioAtPath(tree, path, ratio));
     },
-    [tree, updateTree]
+    [updateTree, path]
   );
 
   if (node.type === 'terminal') {
-    return <TerminalPane id={node.id} />;
+    return <TerminalPane id={node.id} multiPane={multiPane} />;
   }
 
   const { direction, ratio, first, second } = node;
@@ -39,13 +41,24 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({ node }) => {
         height: '100%',
       }}
     >
-      <div style={{ flex: `0 0 calc(${ratio * 100}% - 2px)`, overflow: 'hidden' }}>
-        <SplitContainer node={first} />
+      <div style={{ flex: `0 0 calc(${ratio * 100}% - 0.5px)`, overflow: 'hidden', minWidth: 0, minHeight: 0 }}>
+        <SplitContainer node={first} multiPane={multiPane} path={path + 'f'} />
       </div>
-      <Divider direction={direction} onResize={handleResize(node)} parentRef={containerRef} />
-      <div style={{ flex: 1, overflow: 'hidden' }}>
-        <SplitContainer node={second} />
+      <Divider direction={direction} onResize={handleResize} parentRef={containerRef} />
+      <div style={{ flex: 1, overflow: 'hidden', minWidth: 0, minHeight: 0 }}>
+        <SplitContainer node={second} multiPane={multiPane} path={path + 's'} />
       </div>
     </div>
   );
+};
+
+/** Root of a workspace's pane layout; renders only the zoomed pane when one is zoomed. */
+export const WorkspaceView: React.FC = () => {
+  const tree = useTerminalStore((s) => s.getActiveWorkspace().tree);
+  const zoomedPaneId = useTerminalStore((s) => s.getActiveWorkspace().zoomedPaneId);
+
+  if (zoomedPaneId) {
+    return <TerminalPane id={zoomedPaneId} multiPane={false} />;
+  }
+  return <SplitContainer node={tree} multiPane={tree.type === 'split'} />;
 };

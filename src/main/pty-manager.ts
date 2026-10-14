@@ -1,4 +1,8 @@
 import type { IPty } from 'node-pty';
+import { execFileSync } from 'child_process';
+import fs from 'fs';
+import { buildInitScript, encodeCommand } from './shell-init';
+import { resolvePromptConfig, PromptStyle } from './prompt-presets';
 
 let pty: typeof import('node-pty') | null = null;
 
@@ -9,42 +13,94 @@ function getPty() {
   return pty;
 }
 
+export type ShellId = 'powershell' | 'pwsh';
+
+export interface CreatePtyOptions {
+  cwd?: string;
+  shell?: ShellId;
+  promptStyle?: PromptStyle;
+  cols?: number;
+  rows?: number;
+}
+
 interface PtyEntry {
   process: IPty;
   cwd: string;
 }
 
 const ptys = new Map<string, PtyEntry>();
+const shellPaths = new Map<ShellId, string | null>();
+
+/** Locate a shell executable on PATH (cached). */
+function findShell(shell: ShellId): string | null {
+  if (!shellPaths.has(shell)) {
+    const exe = shell === 'pwsh' ? 'pwsh.exe' : 'powershell.exe';
+    let found: string | null = null;
+    try {
+      found = execFileSync('where.exe', [exe], { encoding: 'utf8', windowsHide: true })
+        .split(/\r?\n/)[0].trim() || null;
+    } catch {
+      found = null;
+    }
+    shellPaths.set(shell, found);
+  }
+  return shellPaths.get(shell) ?? null;
+}
+
+export function getAvailableShells(): ShellId[] {
+  return (['powershell', 'pwsh'] as ShellId[]).filter((s) => findShell(s) !== null);
+}
+
+function resolveCwd(cwd?: string): string {
+  if (cwd) {
+    try {
+      if (fs.statSync(cwd).isDirectory()) return cwd;
+    } catch { /* fall through */ }
+  }
+  return process.env.USERPROFILE || process.cwd();
+}
 
 export function createPty(
   id: string,
   onData: (data: string) => void,
-  onExit: () => void,
-  cwd?: string
+  onExit: (exitCode: number) => void,
+  options: CreatePtyOptions = {}
 ): void {
-  const shell = 'powershell.exe';
-  const startCwd = cwd || process.env.USERPROFILE || process.cwd();
+  if (ptys.has(id)) return;
+
+  const shellExe = findShell(options.shell ?? 'powershell') ?? 'powershell.exe';
+  const startCwd = resolveCwd(options.cwd);
   const env = { ...process.env } as Record<string, string>;
-  // Force UTF-8 output so Unicode/emoji render correctly
   env['PYTHONIOENCODING'] = 'utf-8';
-  env['LANG'] = 'en_US.UTF-8';
+  env['COLORTERM'] = 'truecolor';
+  env['TERM_PROGRAM'] = 'PowerShellSpider';
 
-  const ptyProcess = getPty()!.spawn(shell, ['-NoLogo'], {
-    name: 'xterm-256color',
-    cols: 80,
-    rows: 24,
-    cwd: startCwd,
-    env,
-  });
+  const script = buildInitScript(resolvePromptConfig(options.promptStyle ?? 'auto'));
 
-  // Set UTF-8 encoding on the PowerShell session so emojis/unicode render correctly
-  ptyProcess.write('chcp 65001 | Out-Null; $OutputEncoding = [System.Text.Encoding]::UTF8; [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; cls\r');
+  const ptyProcess = getPty()!.spawn(
+    shellExe,
+    ['-NoLogo', '-NoExit', '-EncodedCommand', encodeCommand(script)],
+    {
+      name: 'xterm-256color',
+      cols: Math.max(2, options.cols ?? 80),
+      rows: Math.max(2, options.rows ?? 24),
+      cwd: startCwd,
+      env,
+    }
+  );
 
   ptyProcess.onData(onData);
-  ptyProcess.onExit(onExit);
+  ptyProcess.onExit(({ exitCode }) => {
+    // Only report exits for PTYs we didn't kill ourselves
+    if (ptys.get(id)?.process === ptyProcess) {
+      ptys.delete(id);
+      onExit(exitCode);
+    }
+  });
 
   ptys.set(id, { process: ptyProcess, cwd: startCwd });
 }
+
 
 export function getCwd(id: string): string {
   return ptys.get(id)?.cwd || process.env.USERPROFILE || process.cwd();
@@ -55,6 +111,7 @@ export function writePty(id: string, data: string): void {
 }
 
 export function resizePty(id: string, cols: number, rows: number): void {
+  if (!Number.isFinite(cols) || !Number.isFinite(rows) || cols < 2 || rows < 2) return;
   try {
     ptys.get(id)?.process.resize(cols, rows);
   } catch {
@@ -65,14 +122,13 @@ export function resizePty(id: string, cols: number, rows: number): void {
 export function killPty(id: string): void {
   const entry = ptys.get(id);
   if (entry) {
-    entry.process.kill();
     ptys.delete(id);
+    try { entry.process.kill(); } catch { /* already gone */ }
   }
 }
 
 export function killAll(): void {
-  for (const [id, entry] of ptys) {
-    entry.process.kill();
-    ptys.delete(id);
+  for (const id of [...ptys.keys()]) {
+    killPty(id);
   }
 }
