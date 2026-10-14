@@ -4,7 +4,9 @@
   "description": "A tmux-like multi-terminal manager for Windows PowerShell",
   "main": ".vite/build/index.js",
   "scripts": {
+    "dev": "node start-dev.js",
     "start": "electron-forge start",
+    "typecheck": "tsc --noEmit",
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
@@ -42,5 +44,6 @@
     "electron": "^40.8.0",
     "typescript": "^5.9.3",
     "vite": "^6.4.1"
-  }
+  },
+  "productName": "PowerShell Spider"
 }

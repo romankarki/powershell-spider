@@ -1,5 +1,6 @@
 import type { ForgeConfig } from '@electron-forge/shared-types';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
+import { MakerZIP } from '@electron-forge/maker-zip';
 import { VitePlugin } from '@electron-forge/plugin-vite';
 import path from 'path';
 import fs from 'fs';
@@ -22,6 +23,12 @@ const config: ForgeConfig = {
     name: 'PowerShell Spider',
     executableName: 'powershell-spider',
     icon: './assets/icon',
+    appCopyright: 'Copyright © romankarki',
+    win32metadata: {
+      CompanyName: 'romankarki',
+      FileDescription: 'PowerShell Spider',
+      ProductName: 'PowerShell Spider',
+    },
     asar: {
       unpack: '**/node_modules/node-pty/**',
     },
@@ -38,10 +45,13 @@ const config: ForgeConfig = {
     },
   },
   makers: [
+    // Installer: out/make/squirrel.windows/x64/*Setup.exe
     new MakerSquirrel({
       name: 'powershell-spider',
       setupIcon: './assets/icon.ico',
     }),
+    // Portable build: out/make/zip/win32/x64/*.zip (unzip and run, no install)
+    new MakerZIP({}, ['win32']),
   ],
   plugins: [
     new VitePlugin({

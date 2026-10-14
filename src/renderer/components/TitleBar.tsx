@@ -47,15 +47,15 @@ export const TitleBar: React.FC = () => {
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1, height: '100%' }}>
         <div style={{ display: 'flex', height: '100%', ...noDrag }}>
-        <button className="win-btn" onClick={() => window.electronAPI.minimize()} title="Minimize">
-          <IconMinimize size={14} />
-        </button>
-        <button className="win-btn" onClick={() => window.electronAPI.maximize()} title={maximized ? 'Restore' : 'Maximize'}>
-          {maximized ? <IconRestore size={13} /> : <IconMaximize size={12} />}
-        </button>
-        <button className="win-btn win-close" onClick={() => window.electronAPI.close()} title="Close">
-          <IconClose size={14} />
-        </button>
+          <button className="win-btn" onClick={() => window.electronAPI.minimize()} title="Minimize">
+            <IconMinimize size={14} />
+          </button>
+          <button className="win-btn" onClick={() => window.electronAPI.maximize()} title={maximized ? 'Restore' : 'Maximize'}>
+            {maximized ? <IconRestore size={13} /> : <IconMaximize size={12} />}
+          </button>
+          <button className="win-btn win-close" onClick={() => window.electronAPI.close()} title="Close">
+            <IconClose size={14} />
+          </button>
         </div>
       </div>
 
