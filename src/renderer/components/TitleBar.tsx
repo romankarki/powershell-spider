@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTerminalStore } from '../state/terminal-store';
 import { useSettingsStore } from '../state/settings-store';
-import { THEMES } from '../themes';
+import { THEMES, getFlavor } from '../themes';
 import { IconMinimize, IconMaximize, IconRestore, IconClose, IconSearch, IconSidebar } from './Icons';
 
 const drag = { WebkitAppRegion: 'drag' } as React.CSSProperties;
@@ -14,6 +14,7 @@ export const TitleBar: React.FC = () => {
   const sidebarCollapsed = useSettingsStore((s) => s.sidebarCollapsed);
   const updateSettings = useSettingsStore((s) => s.update);
   const logo = useSettingsStore((s) => THEMES[s.theme]?.logo ?? '/\\../\\');
+  const tagline = useSettingsStore((s) => getFlavor(s.theme).tagline);
 
   useEffect(() => {
     window.electronAPI.isMaximized().then(setMaximized);
@@ -34,6 +35,7 @@ export const TitleBar: React.FC = () => {
         <span className="titlebar-logo">{logo}</span>
         <span className="titlebar-name">SPIDER</span>
         <span className="titlebar-ws">{workspaceName}</span>
+        {tagline && <span className="titlebar-tagline">{tagline}</span>}
       </div>
 
       <button
@@ -72,6 +74,7 @@ export const TitleBar: React.FC = () => {
           user-select: none;
         }
         .titlebar-logo {
+          white-space: nowrap;
           color: var(--green);
           font-weight: 700;
           font-size: 13px;
@@ -94,6 +97,17 @@ export const TitleBar: React.FC = () => {
           padding-left: 10px;
           border-left: 1px solid var(--border);
         }
+        .titlebar-tagline {
+          color: var(--text-secondary);
+          font-size: 11px;
+          font-style: italic;
+          opacity: 0.7;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          min-width: 0;
+        }
+        @media (max-width: 1150px) { .titlebar-tagline { display: none; } }
         .titlebar-search {
           display: flex;
           align-items: center;

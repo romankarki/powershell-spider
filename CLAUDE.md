@@ -48,6 +48,8 @@ A tmux-like multi-terminal manager for Windows PowerShell, built as a desktop ap
 - **Persistence**: settings (`settings-store.ts`) and session layout (`session.ts`) in localStorage; window bounds in userData/window-state.json
 - **No app menu**: `Menu.setApplicationMenu(null)`, since default accelerators (Ctrl+R reload, Ctrl+W) would hijack terminal keys
 - **Modals** use `useModal` (focus + capture-phase Escape) because xterm stops propagation of keys it handles
+- **Theme flavor** (`themes.ts` → `ThemeFlavor`, read via `getFlavor()`): hero themes carry a tagline, workspace noun, quick-terminal/agent-panel names, a secondary (`--cyan`) color, an `ambient` scenery kind drawn by `AmbientLayer.tsx`, and a `prompt` preset that the "auto" prompt style follows. Add a theme's prompt in `src/main/prompt-presets.ts` and the `PromptStyle` union in both `prompt-presets.ts` and `types/electron.d.ts`
+- **Workspace swipe** lives in `WorkspaceStage.tsx` (wheel-based gesture, page dots); `Ctrl+Alt+←/→` are the keyboard equivalents
 
 ## Development
 

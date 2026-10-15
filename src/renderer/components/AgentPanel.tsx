@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { useTerminalStore } from '../state/terminal-store';
 import { findAllTerminalIds } from '../state/split-tree';
 import { terminalDisplayName } from '../types';
+import { useSettingsStore } from '../state/settings-store';
+import { getFlavor } from '../themes';
 
 export const AgentPanel: React.FC = () => {
   const workspace = useTerminalStore((s) => s.getActiveWorkspace());
   const terminals = useTerminalStore((s) => s.terminals);
   const paneGroups = useTerminalStore((s) => s.paneGroups);
+  const title = useSettingsStore((s) => getFlavor(s.theme).agentPanelName);
   // Expand pane IDs to all terminal IDs across all pane groups
   const paneIds = findAllTerminalIds(workspace.tree);
   const allIds = paneIds.flatMap((paneId) => {
@@ -80,7 +83,7 @@ export const AgentPanel: React.FC = () => {
         }}
       >
         <span style={{ fontSize: '14px' }}>&#9881;</span>
-        AGENT CONTROL
+        {title}
         <span style={{
           marginLeft: 'auto',
           fontSize: '9px',

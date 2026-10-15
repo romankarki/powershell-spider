@@ -1,9 +1,27 @@
 import type { ITheme } from '@xterm/xterm';
 
+/** Decorative scenery drawn faintly over the terminal area (see AmbientLayer). */
+export type Ambient = 'web' | 'batsignal' | 'ocean' | 'spark';
+
+/** Personality on top of the colors: wording, scenery, secondary color, prompt. */
+export interface ThemeFlavor {
+  tagline?: string;
+  /** What a workspace is called ("Workspace" → "Web", "Case", "Island") */
+  workspaceNoun?: string;
+  quickTerminalName?: string;
+  agentPanelName?: string;
+  ambient?: Ambient;
+  /** Secondary (--cyan) color for agent/secondary accents */
+  secondary?: string;
+  /** Prompt preset to use when the prompt style is "auto" */
+  prompt?: string;
+}
+
 export interface SpiderTheme {
   name: string;
   /** Title-bar logo; defaults to the spider */
   logo?: string;
+  flavor?: ThemeFlavor;
   terminal: ITheme;
   ui: {
     bgPrimary: string;
@@ -257,6 +275,15 @@ export const THEMES: Record<string, SpiderTheme> = {
   spiderman: {
     name: 'Spider-Man',
     logo: '/\\(oo)/\\',
+    flavor: {
+      tagline: 'With great power comes great responsibility',
+      workspaceNoun: 'Web',
+      quickTerminalName: 'WEB-SHOOTER',
+      agentPanelName: 'SPIDER-VERSE',
+      ambient: 'web',
+      secondary: '#2f6bff',
+      prompt: 'spiderman',
+    },
     terminal: {
       background: '#0b0f1f',
       foreground: '#e8ecf5',
@@ -297,6 +324,15 @@ export const THEMES: Record<string, SpiderTheme> = {
   batman: {
     name: 'Batman',
     logo: '^\\_/^',
+    flavor: {
+      tagline: 'I am the night',
+      workspaceNoun: 'Case',
+      quickTerminalName: 'BAT-SIGNAL',
+      agentPanelName: 'BAT-COMPUTER',
+      ambient: 'batsignal',
+      secondary: '#8ab4f8',
+      prompt: 'batman',
+    },
     terminal: {
       background: '#0a0a0c',
       foreground: '#d6d6d6',
@@ -337,6 +373,15 @@ export const THEMES: Record<string, SpiderTheme> = {
   onepiece: {
     name: 'One Piece',
     logo: '☠',
+    flavor: {
+      tagline: 'Set sail for the Grand Line',
+      workspaceNoun: 'Island',
+      quickTerminalName: 'DEN DEN MUSHI',
+      agentPanelName: 'THE CREW',
+      ambient: 'ocean',
+      secondary: '#48cae4',
+      prompt: 'onepiece',
+    },
     terminal: {
       background: '#0a2233',
       foreground: '#f3ead7',
@@ -373,10 +418,170 @@ export const THEMES: Record<string, SpiderTheme> = {
       textSecondary: '#86a6bd',
     },
   },
+
+  milesmorales: {
+    name: 'Miles Morales',
+    logo: '/\\(••)/\\',
+    flavor: {
+      tagline: 'Anyone can wear the mask',
+      workspaceNoun: 'Web',
+      quickTerminalName: 'VENOM STRIKE',
+      agentPanelName: 'SPIDER-VERSE',
+      ambient: 'web',
+      secondary: '#a855f7',
+      prompt: 'milesmorales',
+    },
+    terminal: {
+      background: '#0c0810',
+      foreground: '#ece6f5',
+      cursor: '#ff2a4d',
+      cursorAccent: '#0c0810',
+      selectionBackground: 'rgba(168, 85, 247, 0.3)',
+      black: '#0c0810',
+      red: '#ff2a4d',
+      green: '#3ddc84',
+      yellow: '#ffe14d',
+      blue: '#6b8cff',
+      magenta: '#a855f7',
+      cyan: '#36d6e7',
+      white: '#e0d8ee',
+      brightBlack: '#524866',
+      brightRed: '#ff5c77',
+      brightGreen: '#6ef0a6',
+      brightYellow: '#fff17a',
+      brightBlue: '#8fa8ff',
+      brightMagenta: '#c084fc',
+      brightCyan: '#67e8f9',
+      brightWhite: '#ffffff',
+    },
+    ui: {
+      bgPrimary: '#0c0810',
+      bgSecondary: '#140d1b',
+      bgTertiary: '#1d1327',
+      accent: '#ff2a4d',
+      accentDim: '#c41f3b',
+      accentGlow: 'rgba(255, 42, 77, 0.35)',
+      border: '#2c1f3a',
+      borderActive: '#ff2a4d',
+      textPrimary: '#ece6f5',
+      textSecondary: '#8c7fa3',
+    },
+  },
+
+  joker: {
+    name: 'Joker',
+    logo: '>:)',
+    flavor: {
+      tagline: 'Why so serious?',
+      workspaceNoun: 'Scheme',
+      quickTerminalName: 'PUNCHLINE',
+      agentPanelName: 'THE GANG',
+      ambient: 'spark',
+      secondary: '#b388ff',
+      prompt: 'joker',
+    },
+    terminal: {
+      background: '#110a18',
+      foreground: '#e9e1f2',
+      cursor: '#3ddc84',
+      cursorAccent: '#110a18',
+      selectionBackground: 'rgba(61, 220, 132, 0.25)',
+      black: '#110a18',
+      red: '#ff4d6d',
+      green: '#3ddc84',
+      yellow: '#ffd166',
+      blue: '#7c6cff',
+      magenta: '#c77dff',
+      cyan: '#4dd0e1',
+      white: '#e2d9ee',
+      brightBlack: '#5a4a6e',
+      brightRed: '#ff7a92',
+      brightGreen: '#72f0a9',
+      brightYellow: '#ffe08a',
+      brightBlue: '#a094ff',
+      brightMagenta: '#dca4ff',
+      brightCyan: '#80e3ef',
+      brightWhite: '#ffffff',
+    },
+    ui: {
+      bgPrimary: '#110a18',
+      bgSecondary: '#1a1024',
+      bgTertiary: '#241733',
+      accent: '#3ddc84',
+      accentDim: '#2fae68',
+      accentGlow: 'rgba(61, 220, 132, 0.32)',
+      border: '#36254a',
+      borderActive: '#3ddc84',
+      textPrimary: '#e9e1f2',
+      textSecondary: '#9484ab',
+    },
+  },
+
+  wano: {
+    name: 'One Piece · Wano',
+    logo: '☠',
+    flavor: {
+      tagline: 'The Land of Wano awaits',
+      workspaceNoun: 'Island',
+      quickTerminalName: 'DEN DEN MUSHI',
+      agentPanelName: 'THE CREW',
+      ambient: 'spark',
+      secondary: '#ff8fab',
+      prompt: 'wano',
+    },
+    terminal: {
+      background: '#160d12',
+      foreground: '#f6e9e9',
+      cursor: '#ff5c8a',
+      cursorAccent: '#160d12',
+      selectionBackground: 'rgba(255, 92, 138, 0.25)',
+      black: '#160d12',
+      red: '#e63946',
+      green: '#6cc070',
+      yellow: '#f5c542',
+      blue: '#5b8def',
+      magenta: '#ff5c8a',
+      cyan: '#5fd3d3',
+      white: '#f0e0e0',
+      brightBlack: '#5c4650',
+      brightRed: '#ff6b74',
+      brightGreen: '#8fe094',
+      brightYellow: '#ffd96a',
+      brightBlue: '#86aaff',
+      brightMagenta: '#ff8fab',
+      brightCyan: '#8aeaea',
+      brightWhite: '#ffffff',
+    },
+    ui: {
+      bgPrimary: '#160d12',
+      bgSecondary: '#1f131a',
+      bgTertiary: '#2a1a23',
+      accent: '#ff5c8a',
+      accentDim: '#d1456f',
+      accentGlow: 'rgba(255, 92, 138, 0.32)',
+      border: '#3b2531',
+      borderActive: '#ff5c8a',
+      textPrimary: '#f6e9e9',
+      textSecondary: '#a4868f',
+    },
+  },
 };
 
 export type ThemeId = keyof typeof THEMES;
 export const DEFAULT_THEME: ThemeId = 'spider';
+
+const DEFAULT_FLAVOR: Required<Omit<ThemeFlavor, 'ambient' | 'prompt' | 'tagline'>> &
+  Pick<ThemeFlavor, 'ambient' | 'prompt' | 'tagline'> = {
+  workspaceNoun: 'Workspace',
+  quickTerminalName: 'QUICK TERMINAL',
+  agentPanelName: 'AGENT CONTROL',
+  secondary: '#00e5ff',
+};
+
+/** A theme's flavor with defaults filled in. */
+export function getFlavor(themeId: ThemeId): typeof DEFAULT_FLAVOR {
+  return { ...DEFAULT_FLAVOR, ...(THEMES[themeId]?.flavor ?? {}) };
+}
 
 function hexToRgb(hex: string): string {
   const m = hex.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
@@ -399,4 +604,12 @@ export function applyUiTheme(themeId: ThemeId): void {
   root.setProperty('--border-active', theme.ui.borderActive);
   root.setProperty('--text-primary', theme.ui.textPrimary);
   root.setProperty('--text-secondary', theme.ui.textSecondary);
+
+  // Secondary accent (agent panel, focus labels) follows the theme's flavor
+  const secondary = getFlavor(themeId).secondary;
+  const rgb = hexToRgb(secondary);
+  root.setProperty('--cyan', secondary);
+  root.setProperty('--cyan-dim', `rgb(${rgb} / 0.75)`);
+  root.setProperty('--cyan-glow', `rgba(${rgb}, 0.3)`);
+  root.setProperty('--secondary-rgb', rgb);
 }

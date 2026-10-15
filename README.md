@@ -29,7 +29,8 @@ Requires Windows 10 (1809+) or Windows 11. Uses Windows PowerShell by default; P
 - **Session restore**: workspaces, splits, tabs, names and folders come back on next launch
 - **Agent panel**: broadcast a command to any set of terminals (optionally line by line)
 - **Command palette** (Ctrl+Shift+P), **quick drop-down terminal** (Ctrl+\`), **search** (Ctrl+Shift+F)
-- **Themes**: Spider, Ghostty, Dracula, Monokai, Cyberpunk, Solarized, with adjustable font, size, cursor and CRT effects
+- **Themes**: Spider, Ghostty, Dracula, Monokai, Cyberpunk, Solarized, plus **hero themes** (Spider-Man, Miles Morales, Batman, Joker, One Piece, Wano) that bring their own prompt, title-bar logo, tagline, wording (Webs / Cases / Islands, Bat-Computer, Den Den Mushi…) and faint ambient scenery (web, bat-signal, ocean waves). Adjustable font, size, cursor, CRT effects
+- **Swipe between workspaces**: two-finger horizontal swipe on the touchpad (or Ctrl+Alt+←/→), with page dots
 - GPU-accelerated rendering (WebGL); Ctrl+click opens links; drag files in to paste their paths
 
 ## Keyboard shortcuts
@@ -48,6 +49,8 @@ Press **F1** in the app for the full list.
 | `Alt+W/A/S/D` | Move focus up / left / down / right |
 | `Ctrl+Shift+T` | New workspace |
 | `Alt+1…9` | Switch workspace |
+| `Ctrl+Alt+←` / `Ctrl+Alt+→` | Previous / next workspace (or swipe) |
+| `Ctrl+Shift+Z` | Zoom / unzoom pane |
 | `Ctrl+C` | Copy selection (or interrupt when nothing is selected) |
 | `Ctrl+Shift+C`, `Ctrl+Insert` | Copy |
 | `Ctrl+V`, `Ctrl+Shift+V`, `Shift+Insert` | Paste |
@@ -70,9 +73,10 @@ Settings → **Prompt style**:
 
 | Style | Description |
 |---|---|
-| Auto (default) | Your Void config (`~/.void/config.toml`) if present, otherwise **Spider** |
+| Auto (default) | Matches a hero theme's prompt; otherwise your Void config (`~/.void/config.toml`) if present, else **Spider** |
 | Spider | Green powerline prompt |
 | Void · Cyberpunk / Hacker / Minimal | Void's built-in presets |
+| Spider-Man / Miles Morales / Batman / Joker / One Piece / Wano | Hero prompts (used automatically by the matching theme) |
 | My $PROFILE prompt | Leave whatever prompt your PowerShell profile defines (oh-my-posh, Starship, …) |
 
 The prompt is pure PowerShell (no extra install), and the powerline arrows are drawn by the renderer, so no Nerd Font is required.

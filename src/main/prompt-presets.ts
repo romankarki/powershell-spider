@@ -15,7 +15,7 @@ export interface PromptConfig {
 
 export type PromptStyle =
   | 'auto' | 'spider' | 'cyberpunk' | 'hacker' | 'minimal'
-  | 'spiderman' | 'batman' | 'onepiece' | 'profile';
+  | 'spiderman' | 'batman' | 'onepiece' | 'milesmorales' | 'joker' | 'wano' | 'profile';
 
 export const PROMPT_PRESETS: Record<Exclude<PromptStyle, 'auto' | 'profile'>, PromptConfig> = {
   spider: {
@@ -99,6 +99,45 @@ export const PROMPT_PRESETS: Record<Exclude<PromptStyle, 'auto' | 'profile'>, Pr
       exit_code_fg: '#ffffff', exit_code_bg: '#9d0208',
       time_fg: '#f5c542', time_bg: '#0d2b40',
       symbol_fg: '#f5c542',
+    },
+  },
+  milesmorales: {
+    symbol: '❯',
+    segments: ['user', 'git', 'path', 'exit_code', 'time'],
+    palette: {
+      user_fg: '#ffffff', user_bg: '#ff2a4d',
+      git_fg: '#ffffff', git_bg: '#7e22ce',
+      path_fg: '#ece6f5',
+      path_bg_1: '#1d1327', path_bg_2: '#2a1a3a', path_bg_3: '#1d1327', path_bg_4: '#2a1a3a',
+      exit_code_fg: '#0c0810', exit_code_bg: '#ffe14d',
+      time_fg: '#c4b5fd', time_bg: '#140d1b',
+      symbol_fg: '#a855f7',
+    },
+  },
+  joker: {
+    symbol: '❯',
+    segments: ['user', 'git', 'path', 'exit_code', 'time'],
+    palette: {
+      user_fg: '#110a18', user_bg: '#3ddc84',
+      git_fg: '#ffffff', git_bg: '#6a1b9a',
+      path_fg: '#e9e1f2',
+      path_bg_1: '#241733', path_bg_2: '#331f47', path_bg_3: '#241733', path_bg_4: '#331f47',
+      exit_code_fg: '#ffffff', exit_code_bg: '#c2185b',
+      time_fg: '#b388ff', time_bg: '#1a1024',
+      symbol_fg: '#3ddc84',
+    },
+  },
+  wano: {
+    symbol: '☠',
+    segments: ['user', 'git', 'path', 'exit_code', 'time'],
+    palette: {
+      user_fg: '#ffffff', user_bg: '#e63946',
+      git_fg: '#160d12', git_bg: '#f5c542',
+      path_fg: '#f6e9e9',
+      path_bg_1: '#2a1a23', path_bg_2: '#3b2531', path_bg_3: '#2a1a23', path_bg_4: '#3b2531',
+      exit_code_fg: '#ffffff', exit_code_bg: '#9d0208',
+      time_fg: '#ff8fab', time_bg: '#1f131a',
+      symbol_fg: '#ff5c8a',
     },
   },
   // Matches void/presets/minimal.toml

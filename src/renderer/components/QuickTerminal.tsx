@@ -1,6 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useTerminal } from '../hooks/useTerminal';
 import { useTerminalStore } from '../state/terminal-store';
+import { useSettingsStore } from '../state/settings-store';
+import { getFlavor } from '../themes';
 import { IconChevronUp } from './Icons';
 
 export const QuickTerminal: React.FC = () => {
@@ -8,6 +10,7 @@ export const QuickTerminal: React.FC = () => {
   const terminalId = useTerminalStore((s) => s.quickTerminalId);
   const toggle = useTerminalStore((s) => s.toggleQuickTerminal);
   const containerRef = useRef<HTMLDivElement>(null);
+  const title = useSettingsStore((s) => getFlavor(s.theme).quickTerminalName);
   const [closing, setClosing] = useState(false);
 
   // Track visible state separately for animation
@@ -89,7 +92,7 @@ export const QuickTerminal: React.FC = () => {
               textShadow: '0 0 8px var(--green-glow)',
               letterSpacing: 1,
             }}>
-              QUICK TERMINAL
+              {title}
             </span>
             <span style={{
               color: 'var(--text-secondary)',

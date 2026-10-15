@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useTerminalStore } from '../state/terminal-store';
 import { useSettingsStore } from '../state/settings-store';
+import { getFlavor } from '../themes';
 import { findAllTerminalIds } from '../state/split-tree';
 import { IconAgent, IconClose, IconKeyboard, IconPlus, IconSettings } from './Icons';
 
@@ -34,6 +35,7 @@ export const WorkspaceSidebar: React.FC = () => {
   const collapsed = useSettingsStore((s) => s.sidebarCollapsed);
   const width = useSettingsStore((s) => s.sidebarWidth);
   const updateSettings = useSettingsStore((s) => s.update);
+  const noun = useSettingsStore((s) => getFlavor(s.theme).workspaceNoun);
 
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -74,8 +76,8 @@ export const WorkspaceSidebar: React.FC = () => {
     <div className={`sidebar ${collapsed ? 'collapsed' : ''}`} style={{ width: collapsed ? RAIL_WIDTH : width }}>
       {!collapsed && (
         <div className="sidebar-header">
-          <span>WORKSPACES</span>
-          <button className="icon-btn" style={{ width: 22, height: 22 }} onClick={addWorkspace} title="New workspace (Ctrl+Shift+T)">
+          <span>{`${noun}S`.toUpperCase()}</span>
+          <button className="icon-btn" style={{ width: 22, height: 22 }} onClick={addWorkspace} title={`New ${noun.toLowerCase()} (Ctrl+Shift+T)`}>
             <IconPlus size={13} />
           </button>
         </div>

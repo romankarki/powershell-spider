@@ -9,7 +9,7 @@ import { IconClose } from './Icons';
 import { useModal } from '../hooks/useModal';
 
 const PROMPT_STYLES: { value: PromptStyle; label: string; hint: string }[] = [
-  { value: 'auto', label: 'Auto', hint: 'Your Void config (~/.void/config.toml) if present, else Spider' },
+  { value: 'auto', label: 'Auto (match theme)', hint: 'Hero themes use their own prompt; otherwise your Void config (~/.void/config.toml), else Spider' },
   { value: 'spider', label: 'Spider', hint: 'Green powerline prompt' },
   { value: 'cyberpunk', label: 'Void · Cyberpunk', hint: 'Void cyberpunk preset' },
   { value: 'hacker', label: 'Void · Hacker', hint: 'Void hacker preset (vivid)' },
@@ -17,6 +17,9 @@ const PROMPT_STYLES: { value: PromptStyle; label: string; hint: string }[] = [
   { value: 'spiderman', label: 'Spider-Man', hint: 'Red & blue web' },
   { value: 'batman', label: 'Batman', hint: 'Gotham black & yellow' },
   { value: 'onepiece', label: 'One Piece', hint: 'Straw Hat red, gold & ocean' },
+  { value: 'milesmorales', label: 'Miles Morales', hint: 'Red & electric purple' },
+  { value: 'joker', label: 'Joker', hint: 'Acid green & purple' },
+  { value: 'wano', label: 'One Piece · Wano', hint: 'Sakura pink, red & gold' },
   { value: 'profile', label: 'My $PROFILE prompt', hint: 'Keep the prompt defined by your PowerShell profile' },
 ];
 
@@ -214,6 +217,9 @@ export const SettingsPanel: React.FC = () => {
             </Row>
             <Row label="Dim inactive panes">
               <Toggle value={s.dimInactivePanes} onChange={(dimInactivePanes) => s.update({ dimInactivePanes })} />
+            </Row>
+            <Row label="Theme ambience" hint="Spider webs, bat-signal, ocean waves…">
+              <Toggle value={s.ambience} onChange={(ambience) => s.update({ ambience })} />
             </Row>
             <Row label="CRT effects" hint="Scanlines and vignette">
               <Toggle value={s.crtEffects} onChange={(crtEffects) => s.update({ crtEffects })} />

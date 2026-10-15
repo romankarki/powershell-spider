@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTerminalStore } from '../state/terminal-store';
 import { useSettingsStore } from '../state/settings-store';
 import { WorkspaceView } from './SplitContainer';
+import { AmbientLayer } from './AmbientLayer';
 
 /** Accumulated horizontal scroll (px) needed to switch workspace. */
 const COMMIT_DISTANCE = 160;
@@ -139,6 +140,7 @@ export const WorkspaceStage: React.FC = () => {
       >
         <WorkspaceView />
       </div>
+      <AmbientLayer />
 
       <div className={`ws-dots ${showDots ? 'visible' : ''}`} aria-hidden={!showDots}>
         {workspaces.map((ws, i) => {

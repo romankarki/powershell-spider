@@ -4,7 +4,8 @@ import { SearchAddon, ISearchOptions } from '@xterm/addon-search';
 import { Unicode11Addon } from '@xterm/addon-unicode11';
 import { WebglAddon } from '@xterm/addon-webgl';
 import { WebLinksAddon } from '@xterm/addon-web-links';
-import { THEMES, DEFAULT_THEME } from '../themes';
+import { THEMES, DEFAULT_THEME, getFlavor } from '../themes';
+import type { PromptStyle } from '../types/electron';
 import { useSettingsStore, getSettings, Settings } from '../state/settings-store';
 import { comboFromEvent } from '../keys';
 import '@xterm/xterm/css/xterm.css';
@@ -266,7 +267,9 @@ function createEntry(id: string, cwd?: string): TerminalEntry {
   registry.set(id, entry);
 
   const s = getSettings();
-  window.electronAPI.createTerminal(id, { cwd, shell: s.shell, promptStyle: s.promptStyle });
+  const themePrompt = getFlavor(s.theme).prompt as PromptStyle | undefined;
+  const promptStyle = s.promptStyle === 'auto' && themePrompt ? themePrompt : s.promptStyle;
+  window.electronAPI.createTerminal(id, { cwd, shell: s.shell, promptStyle });
   return entry;
 }
 

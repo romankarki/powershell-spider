@@ -6,6 +6,10 @@ import {
 import { createLeaf, splitNode, removeNode, findAllTerminalIds, findNextTerminalId } from './split-tree';
 import { destroyTerminal, setTerminalEvents, focusTerminal } from '../terminal/registry';
 import { loadSession } from './session';
+import { getSettings } from './settings-store';
+import { getFlavor } from '../themes';
+
+const workspaceNoun = () => getFlavor(getSettings().theme).workspaceNoun;
 
 interface TerminalStore {
   workspaces: Workspace[];
@@ -100,7 +104,7 @@ function findWorkspaceOfPane(workspaces: Workspace[], paneId: string): number {
 function freshState() {
   const termId = uuid();
   return {
-    workspaces: [newWorkspace('Workspace 1', termId)],
+    workspaces: [newWorkspace(`${workspaceNoun()} 1`, termId)],
     activeWorkspaceIndex: 0,
     terminals: new Map([[termId, { id: termId, label: 'PS 1' }]]),
     paneGroups: new Map([[termId, { tabIds: [termId], activeTabId: termId }]]),
@@ -181,7 +185,7 @@ export const useTerminalStore = create<TerminalStore>((set, get) => {
     addWorkspace: () => set((state) => {
       const terminals = new Map(state.terminals);
       const { id, counter } = makeTerminal(terminals, state.terminalCounter);
-      const ws = newWorkspace(`Workspace ${state.workspaces.length + 1}`, id);
+      const ws = newWorkspace(`${workspaceNoun()} ${state.workspaces.length + 1}`, id);
       const paneGroups = new Map(state.paneGroups);
       paneGroups.set(id, { tabIds: [id], activeTabId: id });
       return {
