@@ -8,7 +8,8 @@
     "start": "electron-forge start",
     "typecheck": "tsc --noEmit",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make && npm run installer",
+    "installer": "electron-builder --win --prepackaged \"out/PowerShell Spider-win32-x64\""
   },
   "repository": {
     "type": "git",
@@ -20,7 +21,6 @@
   "type": "commonjs",
   "dependencies": {
     "@electron-forge/cli": "^7.11.1",
-    "@electron-forge/maker-squirrel": "^7.11.1",
     "@electron-forge/plugin-vite": "^7.11.1",
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/addon-search": "^0.16.0",
@@ -42,6 +42,7 @@
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^4.7.0",
     "electron": "^40.8.0",
+    "electron-builder": "^26.15.3",
     "typescript": "^5.9.3",
     "vite": "^6.4.1"
   },

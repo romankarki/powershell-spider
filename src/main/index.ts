@@ -23,8 +23,11 @@ if (process.platform === 'win32') {
 app.setAppUserModelId('com.romankarki.powershell-spider');
 
 // Keep dev data (settings, session) separate from an installed copy, which
-// would otherwise hold the same profile locked.
-if (!app.isPackaged) {
+// would otherwise hold the same profile locked. SPIDER_USER_DATA overrides
+// the profile folder (used for testing a packaged build side by side).
+if (process.env.SPIDER_USER_DATA) {
+  app.setPath('userData', process.env.SPIDER_USER_DATA);
+} else if (!app.isPackaged) {
   app.setPath('userData', `${app.getPath('userData')}-dev`);
 }
 
@@ -116,6 +119,7 @@ const createWindow = () => {
   // Show window as soon as content is ready — no white flash
   mainWindow.once('ready-to-show', () => {
     mainWindow?.show();
+    if (process.env.SPIDER_TIMING) console.log(`[timing] window shown at ${process.uptime().toFixed(2)}s`);
   });
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {

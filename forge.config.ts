@@ -1,5 +1,4 @@
 import type { ForgeConfig } from '@electron-forge/shared-types';
-import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { VitePlugin } from '@electron-forge/plugin-vite';
 import path from 'path';
@@ -45,12 +44,9 @@ const config: ForgeConfig = {
     },
   },
   makers: [
-    // Installer: out/make/squirrel.windows/x64/*Setup.exe
-    new MakerSquirrel({
-      name: 'powershell-spider',
-      setupIcon: './assets/icon.ico',
-    }),
-    // Portable build: out/make/zip/win32/x64/*.zip (unzip and run, no install)
+    // Portable build: out/make/zip/win32/x64/*.zip (unzip and run, no install).
+    // The installer is built by electron-builder (NSIS) from the packaged
+    // folder; see electron-builder.yml and the "make" script.
     new MakerZIP({}, ['win32']),
   ],
   plugins: [

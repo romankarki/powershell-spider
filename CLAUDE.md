@@ -65,7 +65,7 @@ npm run dev            # = node start-dev.js
 
 npm run typecheck      # tsc --noEmit
 
-# Installer (Squirrel Setup.exe) + portable zip into out/make
+# Portable zip (out/make) + NSIS installer (dist/) — electron-builder runs on the Forge-packaged folder
 npm run make
 ```
 

@@ -1,0 +1,25 @@
+# NSIS installer built from the Forge-packaged app folder (see "make" script).
+# Plain one-click installer: no splash animation, shortcuts point straight at
+# the exe (no Update.exe shim), standard Apps & Features uninstall entry.
+appId: com.romankarki.powershell-spider
+productName: PowerShell Spider
+executableName: powershell-spider
+copyright: Copyright © romankarki
+directories:
+  output: dist
+win:
+  icon: assets/icon.ico
+  target:
+    - target: nsis
+      arch: [x64]
+  artifactName: ${productName}-${version}-Setup.${ext}
+nsis:
+  oneClick: true
+  perMachine: false
+  allowToChangeInstallationDirectory: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: PowerShell Spider
+  runAfterFinish: true
+  deleteAppDataOnUninstall: false
+  include: build/installer.nsh

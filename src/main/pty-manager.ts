@@ -31,16 +31,32 @@ interface PtyEntry {
 const ptys = new Map<string, PtyEntry>();
 const shellPaths = new Map<ShellId, string | null>();
 
-/** Locate a shell executable on PATH (cached). */
+/** Standard install locations, checked before falling back to a PATH search. */
+function knownShellPaths(shell: ShellId): string[] {
+  const root = process.env.SystemRoot || 'C:\\Windows';
+  if (shell === 'powershell') {
+    return [`${root}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`];
+  }
+  return [
+    `${process.env.ProgramFiles || 'C:\\Program Files'}\\PowerShell\\7\\pwsh.exe`,
+    `${process.env.LOCALAPPDATA || ''}\\Microsoft\\WindowsApps\\pwsh.exe`,
+  ];
+}
+
+/** Locate a shell executable (cached). Well-known paths first: spawning where.exe costs ~100 ms. */
 function findShell(shell: ShellId): string | null {
   if (!shellPaths.has(shell)) {
-    const exe = shell === 'pwsh' ? 'pwsh.exe' : 'powershell.exe';
-    let found: string | null = null;
-    try {
-      found = execFileSync('where.exe', [exe], { encoding: 'utf8', windowsHide: true })
-        .split(/\r?\n/)[0].trim() || null;
-    } catch {
-      found = null;
+    let found = knownShellPaths(shell).find((p) => {
+      try { return fs.statSync(p).isFile(); } catch { return false; }
+    }) ?? null;
+    if (!found) {
+      const exe = shell === 'pwsh' ? 'pwsh.exe' : 'powershell.exe';
+      try {
+        found = execFileSync('where.exe', [exe], { encoding: 'utf8', windowsHide: true })
+          .split(/\r?\n/)[0].trim() || null;
+      } catch {
+        found = null;
+      }
     }
     shellPaths.set(shell, found);
   }
