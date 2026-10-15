@@ -27,6 +27,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   writeClipboard: (text: string) => ipcRenderer.invoke('clipboard:write-text', text),
   openExternal: (url: string) => ipcRenderer.invoke('shell:open-external', url),
   getAppInfo: () => ipcRenderer.invoke('app:info'),
+  setPrewarmHint: (hint: unknown) => ipcRenderer.invoke('app:prewarm-hint', hint),
   getPathForFile: (file: File) => webUtils.getPathForFile(file),
 
   // Window controls

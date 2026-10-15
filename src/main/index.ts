@@ -1,8 +1,8 @@
 import { app, BrowserWindow, Menu, shell, screen } from 'electron';
 import path from 'path';
 import fs from 'fs';
-import { registerIpcHandlers } from './ipc-handlers';
-import { killAll } from './pty-manager';
+import { registerIpcHandlers, prewarmHintFile } from './ipc-handlers';
+import { killAll, prewarmPty, PrewarmHint } from './pty-manager';
 
 // Handle Squirrel.Windows install/update/uninstall events.
 // The app is launched by Squirrel during these phases — quit immediately
@@ -178,6 +178,22 @@ const createWindow = () => {
 Menu.setApplicationMenu(null);
 
 registerIpcHandlers(() => mainWindow);
+
+/** Start the first shell before the window loads (see prewarmPty). */
+function prewarmShell(): void {
+  let hint: PrewarmHint = { shell: 'powershell', promptStyle: 'auto', cwd: '' };
+  try {
+    const saved = JSON.parse(fs.readFileSync(prewarmHintFile(), 'utf8')) as Partial<PrewarmHint>;
+    if (saved.shell === 'pwsh' || saved.shell === 'powershell') hint.shell = saved.shell;
+    if (typeof saved.promptStyle === 'string') hint.promptStyle = saved.promptStyle as PrewarmHint['promptStyle'];
+    if (typeof saved.cwd === 'string') hint.cwd = saved.cwd;
+  } catch { /* first run: defaults */ }
+  prewarmPty(hint);
+}
+
+// Spawning the shell needs nothing from Electron, so do it right away: every
+// millisecond before "ready" is overlap with Chromium's own startup.
+if (!process.env.SPIDER_NO_PREWARM) prewarmShell();
 
 app.on('ready', createWindow);
 

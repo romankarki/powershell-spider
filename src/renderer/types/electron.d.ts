@@ -11,6 +11,12 @@ export interface CreateTerminalOptions {
   rows?: number;
 }
 
+export interface PrewarmHint {
+  shell: ShellId;
+  promptStyle: PromptStyle;
+  cwd: string;
+}
+
 export interface AppInfo {
   version: string;
   shells: ShellId[];
@@ -37,6 +43,7 @@ declare global {
       writeClipboard: (text: string) => Promise<void>;
       openExternal: (url: string) => Promise<void>;
       getAppInfo: () => Promise<AppInfo>;
+      setPrewarmHint: (hint: PrewarmHint) => Promise<void>;
       getPathForFile: (file: File) => string;
       minimize: () => Promise<void>;
       maximize: () => Promise<void>;

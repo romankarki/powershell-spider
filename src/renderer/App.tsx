@@ -14,7 +14,7 @@ import { useSettingsStore } from './state/settings-store';
 import { commandForCombo } from './commands';
 import { comboFromEvent } from './keys';
 import { applyUiTheme } from './themes';
-import { pasteText } from './terminal/registry';
+import { pasteText, effectivePromptStyle } from './terminal/registry';
 
 const REPEATABLE = new Set(['tab.next', 'tab.prev', 'ws.next', 'ws.prev', 'view.zoomIn', 'view.zoomOut', 'pane.up', 'pane.down', 'pane.left', 'pane.right']);
 
@@ -72,6 +72,30 @@ const App: React.FC = () => {
         requestAnimationFrame(() => useTerminalStore.getState().focusActiveTerminal());
       }
     });
+  }, []);
+
+  // Tell the main process what the first shell will look like next time, so it
+  // can be started before the window loads (see prewarmPty in main).
+  useEffect(() => {
+    const sendHint = () => {
+      const t = useTerminalStore.getState();
+      const s = useSettingsStore.getState();
+      const focused = t.terminals.get(t.getFocusedTabId());
+      window.electronAPI.setPrewarmHint({
+        shell: s.shell,
+        promptStyle: effectivePromptStyle(s),
+        cwd: (s.restoreSession && focused?.cwd) || '',
+      });
+    };
+    sendHint();
+    const unsub = useSettingsStore.subscribe((s, prev) => {
+      if (s.shell !== prev.shell || s.promptStyle !== prev.promptStyle || s.theme !== prev.theme || s.restoreSession !== prev.restoreSession) sendHint();
+    });
+    window.addEventListener('beforeunload', sendHint);
+    return () => {
+      unsub();
+      window.removeEventListener('beforeunload', sendHint);
+    };
   }, []);
 
   // Dropping files onto the window types their (quoted) paths into the focused terminal

@@ -1,5 +1,10 @@
 import { ipcMain, BrowserWindow, clipboard, shell, app } from 'electron';
-import { createPty, writePty, resizePty, killPty, killAll, getCwd, getAvailableShells, CreatePtyOptions } from './pty-manager';
+import fs from 'fs';
+import path from 'path';
+import { createPty, writePty, resizePty, killPty, killAll, getCwd, getAvailableShells, CreatePtyOptions, PrewarmHint } from './pty-manager';
+
+/** Where the renderer's hint for next startup's pre-warmed shell is stored. */
+export const prewarmHintFile = () => path.join(app.getPath('userData'), 'prewarm.json');
 
 export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void {
   function safeSend(channel: string, ...args: unknown[]) {
@@ -50,6 +55,10 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
     if (/^https?:\/\//i.test(url)) {
       return shell.openExternal(url);
     }
+  });
+
+  ipcMain.handle('app:prewarm-hint', (_event, hint: PrewarmHint) => {
+    fs.writeFile(prewarmHintFile(), JSON.stringify(hint), () => { /* best effort */ });
   });
 
   ipcMain.handle('app:info', () => ({

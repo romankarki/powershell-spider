@@ -267,10 +267,14 @@ function createEntry(id: string, cwd?: string): TerminalEntry {
   registry.set(id, entry);
 
   const s = getSettings();
-  const themePrompt = getFlavor(s.theme).prompt as PromptStyle | undefined;
-  const promptStyle = s.promptStyle === 'auto' && themePrompt ? themePrompt : s.promptStyle;
-  window.electronAPI.createTerminal(id, { cwd, shell: s.shell, promptStyle });
+  window.electronAPI.createTerminal(id, { cwd, shell: s.shell, promptStyle: effectivePromptStyle(s) });
   return entry;
+}
+
+/** The prompt preset actually used for new shells: a hero theme's own prompt when the style is "auto". */
+export function effectivePromptStyle(s: Settings): PromptStyle {
+  const themePrompt = getFlavor(s.theme).prompt as PromptStyle | undefined;
+  return s.promptStyle === 'auto' && themePrompt ? themePrompt : s.promptStyle;
 }
 
 /** Mount (creating on first use) a terminal into a container. Returns a detach function. */
