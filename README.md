@@ -29,7 +29,7 @@ Requires Windows 10 (1809+) or Windows 11. Uses Windows PowerShell by default; P
 - **Session restore**: workspaces, splits, tabs, names and folders come back on next launch
 - **Agent panel**: broadcast a command to any set of terminals (optionally line by line)
 - **Command palette** (Ctrl+Shift+P), **quick drop-down terminal** (Ctrl+\`), **search** (Ctrl+Shift+F)
-- **Themes**: Spider, Ghostty, Dracula, Monokai, Cyberpunk, Solarized, plus **hero themes** (Spider-Man, Miles Morales, Batman, Joker, One Piece, Wano) that bring their own prompt, title-bar logo, tagline, wording (Webs / Cases / Islands, Bat-Computer, Den Den Mushi…) and faint ambient scenery (web, bat-signal, ocean waves). Adjustable font, size, cursor, CRT effects
+- **Themes**: Ghostty (default), Spider, Dracula, Monokai, Cyberpunk, Solarized, plus **hero themes** (Spider-Man, Miles Morales, Batman, Joker, One Piece, Wano) that bring their own prompt, title-bar logo, tagline, wording (Webs / Cases / Islands, Bat-Computer, Den Den Mushi…) and faint ambient scenery (web, bat-signal, ocean waves). Adjustable font, size, cursor, CRT effects
 - **Swipe between workspaces**: two-finger horizontal swipe on the touchpad (or Ctrl+Alt+←/→), with page dots
 - GPU-accelerated rendering (WebGL); Ctrl+click opens links; drag files in to paste their paths
 
@@ -72,7 +72,8 @@ Settings → **Prompt style**:
 
 | Style | Description |
 |---|---|
-| Auto (default) | Matches a hero theme's prompt; otherwise your Void config (`~/.void/config.toml`) if present, else **Spider** |
+| Auto (default) | Matches a hero theme's prompt; otherwise your Void config (`~/.void/config.toml`) if present, else a prompt matching the theme (Ghostty → blue, others → Spider) |
+| Ghostty | Blue & grey powerline |
 | Spider | Green powerline prompt |
 | Void · Cyberpunk / Hacker / Minimal | Void's built-in presets |
 | Spider-Man / Miles Morales / Batman / Joker / One Piece / Wano | Hero prompts (used automatically by the matching theme) |

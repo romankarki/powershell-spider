@@ -102,7 +102,7 @@ const createWindow = () => {
     frame: false,
     show: false,
     title: 'PowerShell Spider',
-    backgroundColor: '#0a0a0a',
+    backgroundColor: '#0d1117', // Ghostty (default theme) background: no flash before the renderer paints
     // Packaged builds use the exe's embedded icon
     icon: app.isPackaged ? undefined : path.join(__dirname, '../../assets/icon.ico'),
     webPreferences: {
@@ -187,6 +187,7 @@ function prewarmShell(): void {
     if (saved.shell === 'pwsh' || saved.shell === 'powershell') hint.shell = saved.shell;
     if (typeof saved.promptStyle === 'string') hint.promptStyle = saved.promptStyle as PrewarmHint['promptStyle'];
     if (typeof saved.cwd === 'string') hint.cwd = saved.cwd;
+    if (typeof saved.promptFallback === 'string') hint.promptFallback = saved.promptFallback as PrewarmHint['promptStyle'];
   } catch { /* first run: defaults */ }
   prewarmPty(hint);
 }

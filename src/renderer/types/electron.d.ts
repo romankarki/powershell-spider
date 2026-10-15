@@ -1,12 +1,13 @@
 export type ShellId = 'powershell' | 'pwsh';
 export type PromptStyle =
   | 'auto' | 'spider' | 'cyberpunk' | 'hacker' | 'minimal'
-  | 'spiderman' | 'batman' | 'onepiece' | 'milesmorales' | 'joker' | 'wano' | 'profile';
+  | 'ghostty' | 'spiderman' | 'batman' | 'onepiece' | 'milesmorales' | 'joker' | 'wano' | 'profile';
 
 export interface CreateTerminalOptions {
   cwd?: string;
   shell?: ShellId;
   promptStyle?: PromptStyle;
+  promptFallback?: PromptStyle;
   cols?: number;
   rows?: number;
 }
@@ -14,6 +15,7 @@ export interface CreateTerminalOptions {
 export interface PrewarmHint {
   shell: ShellId;
   promptStyle: PromptStyle;
+  promptFallback?: PromptStyle;
   cwd: string;
 }
 

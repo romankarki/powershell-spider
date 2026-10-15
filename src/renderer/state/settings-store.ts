@@ -85,7 +85,14 @@ export const useSettingsStore = create<SettingsStore>()(
     }),
     {
       name: 'spider-settings',
-      version: 1,
+      version: 2,
+      // v2: the default theme changed from Spider to Ghostty; move settings that
+      // still have the old default along (only the theme, nothing else).
+      migrate: (persisted, version) => {
+        const s = persisted as Partial<Settings>;
+        if (version < 2 && s.theme === 'spider') s.theme = 'ghostty';
+        return s;
+      },
       merge: (persisted, current) => {
         const merged = { ...current, ...(persisted as Partial<Settings>) };
         // Guard against stale values from older versions

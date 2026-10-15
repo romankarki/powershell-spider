@@ -267,7 +267,7 @@ function createEntry(id: string, cwd?: string): TerminalEntry {
   registry.set(id, entry);
 
   const s = getSettings();
-  window.electronAPI.createTerminal(id, { cwd, shell: s.shell, promptStyle: effectivePromptStyle(s) });
+  window.electronAPI.createTerminal(id, { cwd, shell: s.shell, promptStyle: effectivePromptStyle(s), promptFallback: promptFallback(s) });
   return entry;
 }
 
@@ -275,6 +275,11 @@ function createEntry(id: string, cwd?: string): TerminalEntry {
 export function effectivePromptStyle(s: Settings): PromptStyle {
   const themePrompt = getFlavor(s.theme).prompt as PromptStyle | undefined;
   return s.promptStyle === 'auto' && themePrompt ? themePrompt : s.promptStyle;
+}
+
+/** Preset used by "auto" when there is no Void config: the theme's fallback (e.g. Ghostty's blue prompt). */
+export function promptFallback(s: Settings): PromptStyle | undefined {
+  return getFlavor(s.theme).fallbackPrompt as PromptStyle | undefined;
 }
 
 /** Mount (creating on first use) a terminal into a container. Returns a detach function. */

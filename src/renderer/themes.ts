@@ -15,6 +15,8 @@ export interface ThemeFlavor {
   secondary?: string;
   /** Prompt preset to use when the prompt style is "auto" */
   prompt?: string;
+  /** Prompt preset for "auto" when the user has no Void config (Void config wins) */
+  fallbackPrompt?: string;
 }
 
 export interface SpiderTheme {
@@ -39,7 +41,7 @@ export interface SpiderTheme {
 
 export const THEMES: Record<string, SpiderTheme> = {
   spider: {
-    name: 'Spider (Default)',
+    name: 'Spider',
     terminal: {
       background: '#0a0a0a',
       foreground: '#e0e0e0',
@@ -78,7 +80,8 @@ export const THEMES: Record<string, SpiderTheme> = {
   },
 
   ghostty: {
-    name: 'Ghostty',
+    name: 'Ghostty (Default)',
+    flavor: { fallbackPrompt: 'ghostty' },
     terminal: {
       background: '#0d1117',
       foreground: '#c9d1d9',
@@ -568,10 +571,10 @@ export const THEMES: Record<string, SpiderTheme> = {
 };
 
 export type ThemeId = keyof typeof THEMES;
-export const DEFAULT_THEME: ThemeId = 'spider';
+export const DEFAULT_THEME: ThemeId = 'ghostty';
 
-const DEFAULT_FLAVOR: Required<Omit<ThemeFlavor, 'ambient' | 'prompt' | 'tagline'>> &
-  Pick<ThemeFlavor, 'ambient' | 'prompt' | 'tagline'> = {
+const DEFAULT_FLAVOR: Required<Omit<ThemeFlavor, 'ambient' | 'prompt' | 'fallbackPrompt' | 'tagline'>> &
+  Pick<ThemeFlavor, 'ambient' | 'prompt' | 'fallbackPrompt' | 'tagline'> = {
   workspaceNoun: 'Workspace',
   quickTerminalName: 'QUICK TERMINAL',
   agentPanelName: 'AGENT CONTROL',

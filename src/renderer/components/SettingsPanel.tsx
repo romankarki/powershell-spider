@@ -9,7 +9,8 @@ import { IconClose } from './Icons';
 import { useModal } from '../hooks/useModal';
 
 const PROMPT_STYLES: { value: PromptStyle; label: string; hint: string }[] = [
-  { value: 'auto', label: 'Auto (match theme)', hint: 'Hero themes use their own prompt; otherwise your Void config (~/.void/config.toml), else Spider' },
+  { value: 'auto', label: 'Auto (match theme)', hint: 'Hero themes use their own prompt; otherwise your Void config (~/.void/config.toml), else a prompt matching the theme' },
+  { value: 'ghostty', label: 'Ghostty', hint: 'Blue & grey powerline' },
   { value: 'spider', label: 'Spider', hint: 'Green powerline prompt' },
   { value: 'cyberpunk', label: 'Void · Cyberpunk', hint: 'Void cyberpunk preset' },
   { value: 'hacker', label: 'Void · Hacker', hint: 'Void hacker preset (vivid)' },

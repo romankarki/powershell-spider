@@ -19,6 +19,7 @@ export interface CreatePtyOptions {
   cwd?: string;
   shell?: ShellId;
   promptStyle?: PromptStyle;
+  promptFallback?: PromptStyle;
   cols?: number;
   rows?: number;
 }
@@ -85,7 +86,7 @@ function spawnShell(options: CreatePtyOptions): { process: IPty; cwd: string } {
   env['COLORTERM'] = 'truecolor';
   env['TERM_PROGRAM'] = 'PowerShellSpider';
 
-  const script = buildInitScript(resolvePromptConfig(options.promptStyle ?? 'auto'));
+  const script = buildInitScript(resolvePromptConfig(options.promptStyle ?? 'auto', options.promptFallback));
 
   const ptyProcess = getPty()!.spawn(
     shellExe,
@@ -109,6 +110,7 @@ function spawnShell(options: CreatePtyOptions): { process: IPty; cwd: string } {
 export interface PrewarmHint {
   shell: ShellId;
   promptStyle: PromptStyle;
+  promptFallback?: PromptStyle;
   cwd: string;
 }
 
@@ -126,7 +128,7 @@ let prewarmed: Prewarmed | null = null;
 export function prewarmPty(hint: PrewarmHint): void {
   if (prewarmed) return;
   try {
-    const { process: proc, cwd } = spawnShell({ shell: hint.shell, promptStyle: hint.promptStyle, cwd: hint.cwd });
+    const { process: proc, cwd } = spawnShell({ shell: hint.shell, promptStyle: hint.promptStyle, promptFallback: hint.promptFallback, cwd: hint.cwd });
     const entry: Prewarmed = {
       process: proc,
       cwd,
@@ -160,6 +162,7 @@ function takePrewarmed(options: CreatePtyOptions): Prewarmed | null {
   const matches = p.alive &&
     (options.shell ?? 'powershell') === p.hint.shell &&
     (options.promptStyle ?? 'auto') === p.hint.promptStyle &&
+    (options.promptStyle !== 'auto' || options.promptFallback === p.hint.promptFallback) &&
     resolveCwd(options.cwd).toLowerCase() === p.cwd.toLowerCase();
   if (!matches) {
     discardPrewarmed();

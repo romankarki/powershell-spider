@@ -15,7 +15,7 @@ export interface PromptConfig {
 
 export type PromptStyle =
   | 'auto' | 'spider' | 'cyberpunk' | 'hacker' | 'minimal'
-  | 'spiderman' | 'batman' | 'onepiece' | 'milesmorales' | 'joker' | 'wano' | 'profile';
+  | 'ghostty' | 'spiderman' | 'batman' | 'onepiece' | 'milesmorales' | 'joker' | 'wano' | 'profile';
 
 export const PROMPT_PRESETS: Record<Exclude<PromptStyle, 'auto' | 'profile'>, PromptConfig> = {
   spider: {
@@ -30,6 +30,20 @@ export const PROMPT_PRESETS: Record<Exclude<PromptStyle, 'auto' | 'profile'>, Pr
       exit_code_fg: '#ffffff', exit_code_bg: '#ff0040',
       time_fg: '#9aa4b8', time_bg: '#1c1c1c',
       symbol_fg: '#00ff41',
+    },
+  },
+  // Blue/grey powerline matching the Ghostty theme
+  ghostty: {
+    symbol: '❯',
+    segments: ['user', 'git', 'path', 'exit_code', 'time'],
+    palette: {
+      user_fg: '#0d1117', user_bg: '#58a6ff',
+      git_fg: '#0d1117', git_bg: '#7ee787',
+      path_fg: '#c9d1d9',
+      path_bg_1: '#21262d', path_bg_2: '#30363d', path_bg_3: '#21262d', path_bg_4: '#30363d',
+      exit_code_fg: '#ffffff', exit_code_bg: '#da3633',
+      time_fg: '#8b949e', time_bg: '#161b22',
+      symbol_fg: '#58a6ff',
     },
   },
   // Matches void/presets/cyberpunk.toml
@@ -209,9 +223,14 @@ export function loadVoidPromptConfig(): PromptConfig | null {
   return cfg;
 }
 
-/** Resolve a prompt style to a concrete config, or null for "use the user's own profile prompt". */
-export function resolvePromptConfig(style: PromptStyle): PromptConfig | null {
+/**
+ * Resolve a prompt style to a concrete config, or null for "use the user's own
+ * profile prompt". "auto" prefers the user's Void config, then the theme's
+ * fallback preset, then Spider.
+ */
+export function resolvePromptConfig(style: PromptStyle, fallback?: PromptStyle): PromptConfig | null {
   if (style === 'profile') return null;
-  if (style === 'auto') return loadVoidPromptConfig() ?? PROMPT_PRESETS.spider;
-  return PROMPT_PRESETS[style] ?? PROMPT_PRESETS.spider;
+  const preset = (id: PromptStyle | undefined) => (id && id !== 'auto' && id !== 'profile' ? PROMPT_PRESETS[id] : undefined);
+  if (style === 'auto') return loadVoidPromptConfig() ?? preset(fallback) ?? PROMPT_PRESETS.spider;
+  return preset(style) ?? PROMPT_PRESETS.spider;
 }

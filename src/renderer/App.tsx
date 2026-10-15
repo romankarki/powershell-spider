@@ -14,7 +14,7 @@ import { useSettingsStore } from './state/settings-store';
 import { commandForCombo } from './commands';
 import { comboFromEvent } from './keys';
 import { applyUiTheme } from './themes';
-import { pasteText, effectivePromptStyle } from './terminal/registry';
+import { pasteText, effectivePromptStyle, promptFallback } from './terminal/registry';
 
 const REPEATABLE = new Set(['tab.next', 'tab.prev', 'ws.next', 'ws.prev', 'view.zoomIn', 'view.zoomOut', 'pane.up', 'pane.down', 'pane.left', 'pane.right']);
 
@@ -84,6 +84,7 @@ const App: React.FC = () => {
       window.electronAPI.setPrewarmHint({
         shell: s.shell,
         promptStyle: effectivePromptStyle(s),
+        promptFallback: promptFallback(s),
         cwd: (s.restoreSession && focused?.cwd) || '',
       });
     };
