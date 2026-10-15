@@ -13,7 +13,9 @@ export interface PromptConfig {
   palette: Record<string, string>;
 }
 
-export type PromptStyle = 'auto' | 'spider' | 'cyberpunk' | 'hacker' | 'minimal' | 'profile';
+export type PromptStyle =
+  | 'auto' | 'spider' | 'cyberpunk' | 'hacker' | 'minimal'
+  | 'spiderman' | 'batman' | 'onepiece' | 'profile';
 
 export const PROMPT_PRESETS: Record<Exclude<PromptStyle, 'auto' | 'profile'>, PromptConfig> = {
   spider: {
@@ -58,6 +60,45 @@ export const PROMPT_PRESETS: Record<Exclude<PromptStyle, 'auto' | 'profile'>, Pr
       exit_code_fg: '#ffffff', exit_code_bg: '#d50000',
       time_fg: '#ffffff', time_bg: '#6200ea',
       symbol_fg: '#00e676',
+    },
+  },
+  spiderman: {
+    symbol: '❯',
+    segments: ['user', 'git', 'path', 'exit_code', 'time'],
+    palette: {
+      user_fg: '#ffffff', user_bg: '#e23636',
+      git_fg: '#ffffff', git_bg: '#2f6bff',
+      path_fg: '#ffffff',
+      path_bg_1: '#1c3d99', path_bg_2: '#b82626', path_bg_3: '#1c3d99', path_bg_4: '#b82626',
+      exit_code_fg: '#0b0f1f', exit_code_bg: '#ffcc33',
+      time_fg: '#c9d3ee', time_bg: '#182046',
+      symbol_fg: '#e23636',
+    },
+  },
+  batman: {
+    symbol: '❯',
+    segments: ['user', 'git', 'path', 'exit_code', 'time'],
+    palette: {
+      user_fg: '#0a0a0c', user_bg: '#ffd400',
+      git_fg: '#ffd400', git_bg: '#33333d',
+      path_fg: '#d6d6d6',
+      path_bg_1: '#1b1b21', path_bg_2: '#26262e', path_bg_3: '#1b1b21', path_bg_4: '#26262e',
+      exit_code_fg: '#ffffff', exit_code_bg: '#c0392b',
+      time_fg: '#7d7d8a', time_bg: '#121216',
+      symbol_fg: '#ffd400',
+    },
+  },
+  onepiece: {
+    symbol: '☠',
+    segments: ['user', 'git', 'path', 'exit_code', 'time'],
+    palette: {
+      user_fg: '#ffffff', user_bg: '#e63946',
+      git_fg: '#0a2233', git_bg: '#52b788',
+      path_fg: '#f3ead7',
+      path_bg_1: '#13374f', path_bg_2: '#1d4f70', path_bg_3: '#276891', path_bg_4: '#1d4f70',
+      exit_code_fg: '#ffffff', exit_code_bg: '#9d0208',
+      time_fg: '#f5c542', time_bg: '#0d2b40',
+      symbol_fg: '#f5c542',
     },
   },
   // Matches void/presets/minimal.toml

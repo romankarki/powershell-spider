@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTerminalStore } from '../state/terminal-store';
 import { useSettingsStore } from '../state/settings-store';
+import { THEMES } from '../themes';
 import { IconMinimize, IconMaximize, IconRestore, IconClose, IconSearch, IconSidebar } from './Icons';
 
 const drag = { WebkitAppRegion: 'drag' } as React.CSSProperties;
@@ -12,6 +13,7 @@ export const TitleBar: React.FC = () => {
   const togglePalette = useTerminalStore((s) => s.toggleCommandPalette);
   const sidebarCollapsed = useSettingsStore((s) => s.sidebarCollapsed);
   const updateSettings = useSettingsStore((s) => s.update);
+  const logo = useSettingsStore((s) => THEMES[s.theme]?.logo ?? '/\\../\\');
 
   useEffect(() => {
     window.electronAPI.isMaximized().then(setMaximized);
@@ -29,7 +31,7 @@ export const TitleBar: React.FC = () => {
         >
           <IconSidebar size={15} />
         </button>
-        <span className="titlebar-logo">/\../\</span>
+        <span className="titlebar-logo">{logo}</span>
         <span className="titlebar-name">SPIDER</span>
         <span className="titlebar-ws">{workspaceName}</span>
       </div>

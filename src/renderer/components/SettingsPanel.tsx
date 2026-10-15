@@ -14,6 +14,9 @@ const PROMPT_STYLES: { value: PromptStyle; label: string; hint: string }[] = [
   { value: 'cyberpunk', label: 'Void · Cyberpunk', hint: 'Void cyberpunk preset' },
   { value: 'hacker', label: 'Void · Hacker', hint: 'Void hacker preset (vivid)' },
   { value: 'minimal', label: 'Void · Minimal', hint: 'Path only' },
+  { value: 'spiderman', label: 'Spider-Man', hint: 'Red & blue web' },
+  { value: 'batman', label: 'Batman', hint: 'Gotham black & yellow' },
+  { value: 'onepiece', label: 'One Piece', hint: 'Straw Hat red, gold & ocean' },
   { value: 'profile', label: 'My $PROFILE prompt', hint: 'Keep the prompt defined by your PowerShell profile' },
 ];
 
@@ -202,6 +205,9 @@ export const SettingsPanel: React.FC = () => {
             </Row>
             <Row label="Warn before multi-line paste" hint="Only when the program can't receive a safe paste">
               <Toggle value={s.warnMultilinePaste} onChange={(warnMultilinePaste) => s.update({ warnMultilinePaste })} />
+            </Row>
+            <Row label="Swipe to switch workspaces" hint="Two-finger horizontal swipe on a touchpad">
+              <Toggle value={s.swipeWorkspaces} onChange={(swipeWorkspaces) => s.update({ swipeWorkspaces })} />
             </Row>
             <Row label="Restore workspaces on startup" hint="Reopens layouts, tabs and folders">
               <Toggle value={s.restoreSession} onChange={(restoreSession) => s.update({ restoreSession })} />

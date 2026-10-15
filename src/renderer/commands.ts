@@ -48,6 +48,8 @@ export const COMMANDS: AppCommand[] = [
 
   // Workspaces
   { id: 'ws.new', label: 'New Workspace', category: 'WORKSPACE', keys: ['Ctrl+Shift+T'], global: true, run: () => store().addWorkspace() },
+  { id: 'ws.next', label: 'Next Workspace', category: 'WORKSPACE', keys: ['Ctrl+Alt+ArrowRight'], run: () => store().setActiveWorkspace(store().activeWorkspaceIndex + 1) },
+  { id: 'ws.prev', label: 'Previous Workspace', category: 'WORKSPACE', keys: ['Ctrl+Alt+ArrowLeft'], run: () => store().setActiveWorkspace(store().activeWorkspaceIndex - 1) },
   ...Array.from({ length: 9 }, (_, i): AppCommand => ({
     id: `ws.goto${i + 1}`,
     label: `Go to Workspace ${i + 1}`,

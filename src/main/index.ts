@@ -22,7 +22,26 @@ if (process.platform === 'win32') {
 // Shows up in the taskbar/notifications instead of "electron.app.*"
 app.setAppUserModelId('com.romankarki.powershell-spider');
 
+// Keep dev data (settings, session) separate from an installed copy, which
+// would otherwise hold the same profile locked.
+if (!app.isPackaged) {
+  app.setPath('userData', `${app.getPath('userData')}-dev`);
+}
+
 let mainWindow: BrowserWindow | null = null;
+
+// One instance per profile: a second launch would block on the locked
+// storage, so focus the existing window instead.
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (!mainWindow) return;
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+  });
+}
 
 // Declare forge vite globals
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;

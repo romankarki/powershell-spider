@@ -13,6 +13,7 @@ const SECTIONS: { title: string; categories: CommandCategory[] }[] = [
 ];
 
 const EXTRA_TIPS = [
+  'Swipe sideways with two fingers on the touchpad to switch workspaces.',
   'Right-click a terminal for copy / paste / split.',
   'Ctrl+click a URL to open it in your browser.',
   'Double-click a tab or workspace to rename it.',

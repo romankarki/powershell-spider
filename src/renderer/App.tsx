@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { TitleBar } from './components/TitleBar';
 import { WorkspaceSidebar } from './components/WorkspaceSidebar';
-import { WorkspaceView } from './components/SplitContainer';
+import { WorkspaceStage } from './components/WorkspaceStage';
 import { StatusBar } from './components/StatusBar';
 import { CommandPalette } from './components/CommandPalette';
 import { AgentPanel } from './components/AgentPanel';
@@ -16,7 +16,7 @@ import { comboFromEvent } from './keys';
 import { applyUiTheme } from './themes';
 import { pasteText } from './terminal/registry';
 
-const REPEATABLE = new Set(['tab.next', 'tab.prev', 'view.zoomIn', 'view.zoomOut', 'pane.up', 'pane.down', 'pane.left', 'pane.right']);
+const REPEATABLE = new Set(['tab.next', 'tab.prev', 'ws.next', 'ws.prev', 'view.zoomIn', 'view.zoomOut', 'pane.up', 'pane.down', 'pane.left', 'pane.right']);
 
 /** True for text fields other than xterm's hidden input textarea. */
 function isEditableTarget(target: EventTarget | null): boolean {
@@ -102,9 +102,7 @@ const App: React.FC = () => {
       <TitleBar />
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
         <WorkspaceSidebar />
-        <main style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
-          <WorkspaceView />
-        </main>
+        <WorkspaceStage />
         {agentPanelOpen && <AgentPanel />}
       </div>
       <StatusBar />

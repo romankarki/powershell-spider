@@ -1,5 +1,7 @@
 export type ShellId = 'powershell' | 'pwsh';
-export type PromptStyle = 'auto' | 'spider' | 'cyberpunk' | 'hacker' | 'minimal' | 'profile';
+export type PromptStyle =
+  | 'auto' | 'spider' | 'cyberpunk' | 'hacker' | 'minimal'
+  | 'spiderman' | 'batman' | 'onepiece' | 'profile';
 
 export interface CreateTerminalOptions {
   cwd?: string;

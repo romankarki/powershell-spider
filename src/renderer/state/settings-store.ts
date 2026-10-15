@@ -35,6 +35,7 @@ export interface Settings {
   crtEffects: boolean;
   dimInactivePanes: boolean;
   restoreSession: boolean;
+  swipeWorkspaces: boolean;
   shell: ShellId;
   promptStyle: PromptStyle;
   sidebarCollapsed: boolean;
@@ -55,6 +56,7 @@ export const DEFAULT_SETTINGS: Settings = {
   crtEffects: true,
   dimInactivePanes: true,
   restoreSession: true,
+  swipeWorkspaces: true,
   shell: 'powershell',
   promptStyle: 'auto',
   sidebarCollapsed: false,

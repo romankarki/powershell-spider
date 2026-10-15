@@ -4,6 +4,10 @@ const DISPLAY: Record<string, string> = {
   PageUp: 'PgUp',
   PageDown: 'PgDn',
   Insert: 'Ins',
+  ArrowLeft: '←',
+  ArrowRight: '→',
+  ArrowUp: '↑',
+  ArrowDown: '↓',
   '`': '`',
 };
 
